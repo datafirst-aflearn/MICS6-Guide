@@ -1,0 +1,292 @@
+# Constructing research-ready reading variables {#c03-reading}
+
+The raw MICS6 reading data are unusually difficult to use correctly across countries.
+
+AFLEARN's reading-processing script addresses four problems:
+
+1. **multiple reading passages and languages**;
+2. **passage length**, which is needed to calculate the 90% accuracy threshold;
+3. **country-specific variable layouts and questionnaire adaptations**; and
+4. **complex skip patterns**, which mean that a missing passage result can have several substantively different explanations.
+
+The goal is to turn the raw reading fields into variables that researchers can interpret without reconstructing the questionnaire routing every time.
+
+## The script
+
+The current AFLEARN script is [`harmonize-mics-reading-v1.1.R`](https://github.com/datafirst-aflearn/MICS6-Guide/blob/main/Script/harmonize-mics-reading-v1.1.R). It reads `Data/UNICEF/` and writes to `Data/AFLEARN Harmonised Data/`.
+
+With the clean UNICEF folders in place, run:
+
+```{r eval=FALSE}
+source("Script/harmonize-mics-reading-v1.1.R")
+```
+
+The existing implementation writes:
+
+```text
+Data/AFLEARN Harmonised Data/mics6_reading_harmonized.dta
+```
+
+with one child-level record per `fs` observation in the supported surveys and identifiers that allow the reading variables to be merged with the harmonised `fs` data or, later, an IPUMS MICS extract.
+
+## Why AFLEARN constructs additional reading variables
+
+### Problem 1: a country can have more than one passage
+
+In multilingual surveys, the original UNICEF file can contain more than one reading passage.
+
+The most important example for understanding the issue is Malawi, where children could be assessed in **English and Chichewa**.
+
+A research-ready dataset therefore needs to know:
+
+```text
+Which passage did this child attempt?
+              │
+              ▼
+What language was that passage?
+              │
+              ▼
+How long was that passage?
+```
+
+This is also the reason the IPUMS reading variables should not be used in multi-passage MICS6 countries: as explained in [Getting data from IPUMS MICS](#c01-ipums), IPUMS retains only one passage in these cases.
+
+### Problem 2: passage length is required for reading accuracy
+
+MICS foundational reading requires at least **90% of the passage words to be read correctly**.
+
+If:
+
+```text
+words attempted = A
+words read incorrectly = I
+```
+
+then:
+
+```text
+words read correctly = A - I
+```
+
+But that is not enough to determine accuracy. We also need:
+
+```text
+L = total number of words in the passage
+```
+
+so that:
+
+\[
+\text{reading accuracy} =
+\frac{\text{words read correctly}}
+     {\text{passage length}}
+\]
+
+The released country datasets do not provide one simple harmonised variable giving the length of the passage administered to each child.
+
+AFLEARN therefore constructs `passage_language` and `passage_length`.
+
+### Problem 3: missing reading results have different meanings
+
+Consider these children:
+
+```text
+Child A   age 6
+Child B   age 10, caregiver did not consent
+Child C   age 10, no suitable assessment language
+Child D   age 10, child declined the story
+Child E   age 10, failed the practice sequence
+Child F   age 10, attempted the main passage
+```
+
+A simple reading-score variable may be missing for A–E.
+
+But these children did not reach the same point in the assessment and should not automatically be treated as a single "missing reading data" category.
+
+AFLEARN therefore creates `reading_status`.
+
+## The `reading_status` variable
+
+The current harmonisation distinguishes:
+
+| Code | Reading assessment status |
+|---:|---|
+| 0 | Not interviewed |
+| 1 | Outside the FLS reading age range |
+| 2 | Caregiver consent not given |
+| 3 | Child consent not given |
+| 4 | Assessment language mismatch |
+| 5 | Child did not want to read the story |
+| 6 | Failed the practice sentence/questions |
+| 7 | Attempted a reading passage |
+| 8 | Met the foundational-reading criterion |
+| 9 | Not classified because the data are inconsistent with the expected routing |
+
+This variable is useful for two different purposes.
+
+First, it makes **sample construction transparent**. Researchers can see why an age-eligible child has no passage score.
+
+Second, it makes **data-quality checks** easier. Code 9 deliberately identifies observations that cannot be reconciled cleanly with the expected questionnaire pathway rather than silently forcing them into another category.
+
+::: {.warningbox-header}
+**Do not recode all non-attempts as children who cannot read**
+:::
+
+::: {.warningbox}
+A child who was not assessed because an appropriate language was unavailable has not demonstrated the same thing as a child who attempted the passage and read no words correctly.
+:::
+
+## Reading outcomes in the harmonised file
+
+The current output includes variables such as:
+
+| Variable | Meaning |
+|---|---|
+| `passage_language` | Language of the main/primary passage |
+| `passage_length` | Number of words in that passage |
+| `words_att` | Words attempted |
+| `words_incorrect` | Words missed/read incorrectly |
+| `reading_score` | Words read correctly |
+| `reading_accuracy` | Share of passage words read correctly |
+| `read_comp_1`–`read_comp_5` | Five comprehension items |
+| `read_comp_score` | Number of comprehension items correct |
+| `reading_skills` | Foundational-reading classification |
+| `reading_status` | Assessment pathway/outcome |
+| `*B*` variables | Corresponding fields for a second passage where applicable |
+| `max_reading_*` | Best result across passages where more than one was attempted |
+
+The output also retains:
+
+```text
+country_iso3
+year
+HH1
+HH2
+LN
+cluster
+hhno
+linech
+```
+
+so that it can be merged to both AFLEARN's harmonised `fs` file and an IPUMS child extract.
+
+## Children who attempted more than one passage
+
+Some children attempted more than one reading passage.
+
+This is analytically different from a child who attempted only one.
+
+The AFLEARN processing retains passage-specific information and creates `max_reading_*` variables so that researchers can identify the best observed result across passages where this is appropriate for the research question.
+
+Researchers should state explicitly how multiple attempts are handled rather than silently choosing one.
+
+## Checking the output
+
+In R:
+
+```{r eval=FALSE}
+library(haven)
+library(dplyr)
+
+reading <- read_dta(
+  "Data/AFLEARN Harmonised Data/mics6_reading_harmonized.dta"
+)
+
+reading %>%
+  count(country_iso3, year)
+
+reading %>%
+  count(country_iso3, reading_status)
+
+summary(reading$reading_accuracy)
+```
+
+Reading accuracy should normally fall between 0 and 1. Values outside that range should trigger investigation.
+
+You should also inspect the distribution of passage languages:
+
+```{r eval=FALSE}
+reading %>%
+  count(country_iso3, passage_language)
+```
+
+and, for multi-passage countries, passage-specific attempt counts.
+
+## Merge reading onto the harmonised `fs` file
+
+In R:
+
+```{r eval=FALSE}
+library(dplyr)
+
+fs <- haven::read_dta(
+  "Data/AFLEARN Harmonised Data/mics6_fs_harmonized.dta"
+)
+reading <- haven::read_dta(
+  "Data/AFLEARN Harmonised Data/mics6_reading_harmonized.dta"
+)
+
+analysis <- fs %>%
+  left_join(
+    reading,
+    by = c(
+      "country_iso3",
+      "year",
+      "HH1",
+      "HH2",
+      "LN"
+    ),
+    relationship = "one-to-one",
+    suffix = c("", "_reading")
+  )
+```
+
+Before merging, check that the keys are unique in both files.
+
+```{r eval=FALSE}
+fs %>%
+  count(country_iso3, year, HH1, HH2, LN) %>%
+  filter(n > 1)
+
+reading %>%
+  count(country_iso3, year, HH1, HH2, LN) %>%
+  filter(n > 1)
+```
+
+In Stata:
+
+```stata
+use "Data/AFLEARN Harmonised Data/mics6_fs_harmonized.dta", clear
+
+isid country_iso3 year HH1 HH2 LN
+
+merge 1:1 country_iso3 year HH1 HH2 LN using ///
+    "Data/AFLEARN Harmonised Data/mics6_reading_harmonized.dta"
+
+tab _merge
+```
+
+## Implementing the 90% accuracy threshold
+
+AFLEARN implements the reading-accuracy threshold using the passage-specific word count and reproduces the classification used in MICS publications.
+
+Where 90% of the passage length is not an integer, AFLEARN uses the integer cutoff that reproduces the published MICS classification. This choice was validated empirically by comparing alternative classifications against published MICS results.
+
+The detailed validation and construction rules are documented in [Reading-variable construction](#c07-reading-construction).
+
+## Next
+
+If you are using the original UNICEF data, you now have the core pieces required for analysis:
+
+```text
+harmonised fs data
+       +
+research-ready reading data
+       │
+       ▼
+child-level analysis file
+```
+
+Before estimating means, proportions, regressions or confidence intervals, read [Survey design, weights and standard errors](#c05-survey-design).
+
+If you instead want to combine these reading outcomes with an IPUMS MICS extract, see [Adding the correct reading data to an IPUMS extract](#c04-ipums-reading).

@@ -1,0 +1,54 @@
+# What's in MICS6 data? {#c02-whats-in-data}
+
+Before analysing MICS6 foundational learning data, it is important to understand **how a MICS survey is organised**. MICS is not a school assessment dataset and it is not delivered as one flat file. It is a household survey containing several questionnaires and data files with different units of observation.
+
+This section explains:
+
+- how MICS6 is structured;
+- which files are relevant for research on children and learning;
+- how households and individuals are identified across files;
+- how children enter the `fs` file;
+- what the Foundational Learning Skills (FLS) module measures; and
+- why the reading data require particular care.
+
+::: {.alternativebox-header}
+**Why this matters**
+:::
+
+::: {.alternativebox}
+Many errors in MICS analysis happen before a statistical model is run. Using the wrong file, misunderstanding who appears in the `fs` dataset, merging on an incomplete identifier, or treating a reading skip as ordinary missing data can all change the population represented in an analysis.
+:::
+
+The [UNICEF MICS6 Manual for Statistical Data Analysis](https://data.unicef.org/wp-content/uploads/2019/07/MICS6-manual-for-stats-data-analysis-English_2020_v2.pdf) is the main reference for the MICS6 questionnaire structure and standard indicator construction. The [UNICEF Foundational Learning Skills Module resource](https://data.unicef.org/resources/the-foundational-learning-skills-module/) provides additional background on the learning assessment.
+
+## The key idea: MICS links information across levels
+
+A useful way to think about MICS is as a set of linked datasets:
+
+```text
+HOUSEHOLD
+   │
+   ├── household characteristics
+   │
+   ├── household member 1
+   ├── household member 2
+   ├── household member 3
+   │        │
+   │        ├── may have an individual questionnaire
+   │        │
+   │        └── may be selected for the 5–17 questionnaire
+   │
+   └── household member n
+```
+
+The household questionnaire tells us about the household and everyone listed in it. Additional questionnaires collect more detailed information for particular populations, including women, men, children under five and **one randomly selected child aged 5–17 per household**.
+
+For foundational-learning research, the most important files are usually:
+
+- `fs`: the selected child aged 5–17;
+- `hl`: all household members; and
+- `hh`: the household.
+
+Researchers may also need other files for particular questions.
+
+The next page explains these files and their identifiers in detail: [Files, units of observation and identifiers](#c02-files).

@@ -1,0 +1,290 @@
+# Reading-variable construction {#c07-reading-construction}
+
+The reading harmonisation is the most technically involved part of the AFLEARN MICS6 workflow.
+
+The current script is:
+
+```text
+harmonize-mics-reading-v1.1.R
+```
+
+Its purpose is to transform survey-specific reading variables into a consistent child-level file while retaining the information required to understand **which language and passage each child was assessed in**.
+
+## Pipeline
+
+For each survey:
+
+```text
+identify survey
+      ↓
+repair questionnaire-numbering differences
+      ↓
+rename reading variables
+      ↓
+repair known source-data problems
+      ↓
+identify passage language
+      ↓
+derive passage length
+      ↓
+handle second/third passages
+      ↓
+construct word + comprehension scores
+      ↓
+construct reading accuracy
+      ↓
+construct foundational-reading classification
+      ↓
+classify reading-status pathway
+      ↓
+retain merge identifiers
+```
+
+## Reading score
+
+For a passage:
+
+```text
+reading_score =
+    words attempted
+  - words read incorrectly
+```
+
+or:
+
+\[
+\text{reading score}
+=
+\text{words attempted}
+-
+\text{words incorrect}
+\]
+
+The same structure is retained separately for additional passages where relevant.
+
+## Passage language
+
+For single-language surveys, the passage language can be assigned directly.
+
+For multilingual surveys, the language often needs to be inferred using survey-specific combinations of:
+
+- language of instruction;
+- home language;
+- story selected;
+- passage attempted; and
+- country questionnaire routing.
+
+This is why `passage_language` is a **constructed variable**, not merely a renamed questionnaire field.
+
+## Passage length
+
+Reading accuracy requires the number of words in the passage.
+
+The current script derives passage length from the observed source data, generally using the maximum number of words attempted among children assigned to the relevant passage language:
+
+\[
+L_l =
+\max(\text{words attempted}\mid\text{passage language}=l)
+\]
+
+where \(L_l\) is the inferred length of passage language \(l\).
+
+The resulting variable is:
+
+```text
+passage_length
+```
+
+with equivalent fields for additional passages.
+
+### Validation requirement
+
+A data-derived passage length should always be checked.
+
+If no child reaches the end of a passage, the observed maximum can underestimate its true length.
+
+Validation should therefore include:
+
+```text
+maximum observed words attempted
+questionnaire/story text where available
+range of derived reading_accuracy
+published survey information
+```
+
+A derived accuracy greater than 1 is an immediate warning that passage length or source counts require investigation.
+
+## Reading accuracy
+
+AFLEARN defines:
+
+\[
+\text{reading accuracy}
+=
+\frac{\text{reading score}}
+{\text{passage length}}
+\]
+
+The output variable is:
+
+```text
+reading_accuracy
+```
+
+with passage-specific equivalents where applicable.
+
+## Comprehension
+
+The standard reading assessment contains five comprehension questions.
+
+AFLEARN retains:
+
+```text
+read_comp_1
+read_comp_2
+read_comp_3
+read_comp_4
+read_comp_5
+```
+
+and constructs:
+
+```text
+read_comp_score
+```
+
+as the number answered correctly, conditional on the relevant comprehension sequence having been administered.
+
+Country-specific source-variable mappings are handled before the score is constructed.
+
+## Foundational-reading classification
+
+The current AFLEARN construction combines:
+
+```text
+reading accuracy
++
+comprehension
+```
+
+The implementation uses the passage-specific integer word cutoff that reproduces the classifications in published MICS outputs.
+
+Where 90% of passage length is not an integer, AFLEARN uses a rounded-down word-count cutoff because validation against published MICS classifications showed that this reproduced the MICS results.
+
+The current implementation is conceptually:
+
+```r
+cutoff <- trunc(0.9 * passage_length)
+
+reading_skills =
+  reading_score >= cutoff &
+  comprehension criterion met
+```
+
+This rounding convention is therefore **intentional**, not a numerical approximation introduced by the guide.
+
+Whenever the reading script is changed, the resulting classifications should again be checked against published country results.
+
+## Multiple passages
+
+A second or third passage is not treated as generic missingness.
+
+The script retains passage-specific variables where needed and builds summary fields such as:
+
+```text
+max_reading_score
+max_reading_accuracy
+max_reading_skills
+```
+
+For children with more than one valid attempt, these represent the best observed result across relevant passages.
+
+Researchers should state explicitly when these `max_*` outcomes are used.
+
+## Malawi
+
+Malawi requires special treatment because English and Chichewa are stored as separate passages.
+
+Some children attempt only Chichewa.
+
+The script therefore moves Chichewa-only attempts into the primary analysis slots while retaining the passage-language information.
+
+This ensures that the combined reading file contains the complete assessment rather than treating the English passage as if it were the entire Malawi reading sample.
+
+## Practice items
+
+The reading pathway includes a practice sequence.
+
+AFLEARN retains the practice items and constructs:
+
+```text
+practice_outcome
+fail_practice
+```
+
+These are important because children who fail the practice sequence may never reach the main passage.
+
+A missing main-passage score is therefore not sufficient to distinguish low performance from other assessment pathways.
+
+## `reading_status`
+
+AFLEARN constructs:
+
+| Code | Meaning |
+|---:|---|
+| 0 | Not interviewed |
+| 1 | Outside FLS reading age |
+| 2 | Caregiver consent not given |
+| 3 | Child consent not given |
+| 4 | Assessment-language mismatch |
+| 5 | Child did not want to read story |
+| 6 | Failed practice |
+| 7 | Attempted a reading passage |
+| 8 | Met foundational-reading criterion |
+| 9 | Not classified / inconsistent routing |
+
+The order of assignment matters.
+
+Later observed outcomes overwrite earlier provisional categories where appropriate; code 9 catches observations that remain inconsistent with the expected routing.
+
+The purpose is not just convenience. `reading_status` makes the denominator and assessment pathway visible to analysts.
+
+## Output variables
+
+The research-ready reading file contains, where applicable:
+
+```text
+country_iso3
+year
+
+HH1
+HH2
+LN
+
+cluster
+hhno
+linech
+
+reading_status
+
+passage_language
+passage_length
+
+words_att
+words_incorrect
+reading_score
+reading_accuracy
+
+read_comp_1 ... read_comp_5
+read_comp_score
+
+practice_*
+practice_outcome
+
+reading_skills
+
+passage-B/C equivalents
+max_reading_*
+```
+
+The technical script remains the authoritative record of the exact processing sequence.

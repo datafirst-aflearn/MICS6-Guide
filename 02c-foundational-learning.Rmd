@@ -1,0 +1,105 @@
+# The Foundational Learning Skills module {#c02-fls}
+
+The **Foundational Learning Skills (FLS) module** was introduced in MICS6 to directly assess basic reading and numeracy skills through a household survey.
+
+UNICEF describes the module as assessing skills expected in the early primary grades, with children aged **7–14** as the target population. Because the assessment is administered in households rather than schools, it includes children regardless of whether they are currently enrolled or attending school.
+
+See UNICEF's [Foundational Learning Skills Module](https://data.unicef.org/resources/the-foundational-learning-skills-module/) and the [MICS6 Manual for Statistical Data Analysis](https://data.unicef.org/wp-content/uploads/2019/07/MICS6-manual-for-stats-data-analysis-English_2020_v2.pdf).
+
+## What does the module assess?
+
+The module contains two broad assessment areas:
+
+```text
+FOUNDATIONAL LEARNING SKILLS
+          │
+          ├── READING
+          │      ├── oral reading accuracy
+          │      ├── literal comprehension
+          │      └── inferential comprehension
+          │
+          └── NUMERACY
+                 ├── number reading
+                 ├── number discrimination
+                 ├── addition
+                 └── pattern recognition
+```
+
+The released microdata contain substantially more information than a single "meets/does not meet" indicator. Researchers can work with the underlying tasks and items to examine **where in the progression children are succeeding or struggling**.
+
+::: {.alternativebox-header}
+**Do not restrict yourself automatically to the headline indicator**
+:::
+
+::: {.alternativebox}
+The official binary foundational-skills indicators are useful for reporting a common benchmark, but they discard substantial information. The item-level data allow analysis of individual domains, total scores, patterns of mastery and distributions of performance.
+:::
+
+## The assessment is not a conventional school test
+
+The FLS module differs from many international and national learning assessments in several ways.
+
+It is:
+
+- administered in the child's household;
+- administered to a broad age range rather than one school grade;
+- able to include children who are out of school;
+- relatively short;
+- designed around foundational skills expected in early primary school; and
+- embedded within a much larger household survey.
+
+This creates important research opportunities. Learning can be studied alongside household wealth, family composition, disability, schooling histories and other characteristics collected in MICS.
+
+It also creates comparability issues that researchers need to consider, particularly:
+
+- children's age and grade;
+- whether they are currently in school;
+- the timing of fieldwork within the school year; and
+- the language in which reading was assessed.
+
+Later worked examples show how these features can be incorporated into analysis.
+
+## Official foundational reading skills
+
+UNICEF defines foundational reading skills using three components:
+
+1. **oral reading accuracy** — the child reads at least 90% of the words in the story correctly;
+2. **literal comprehension** — the child answers all three literal comprehension questions correctly; and
+3. **inferential comprehension** — the child answers both inferential comprehension questions correctly.
+
+A child must satisfy **all three** to be classified as having foundational reading skills.
+
+This is a demanding conjunctive indicator: failure to meet any one component means the child does not meet the overall benchmark.
+
+The reading assessment is explained in detail in [Understanding the MICS6 reading assessment](#c02-reading).
+
+## Official foundational numeracy skills
+
+UNICEF defines four numeracy tasks:
+
+1. **number reading** — 6 items;
+2. **number discrimination** — 5 items;
+3. **addition** — 5 items; and
+4. **pattern recognition and completion** — 5 items.
+
+To successfully complete a task, the child must answer **all items within that task correctly**. To be classified as having foundational numeracy skills, the child must successfully complete **all four tasks**.
+
+The [UNICEF FLS adaptation guidelines](https://data.unicef.org/wp-content/uploads/2019/09/FL-module-adaptation-guidelines-August-21-2019.pdf) set out these rules in the standard tabulation plan.
+
+We describe the item structure in [Understanding the MICS6 numeracy assessment](#c02-numeracy).
+
+## FLS and SDG 4.1.1(a)
+
+The MICS6 FLS module was developed to contribute information on foundational reading and numeracy at the Grade 2/3 level. MICS tabulation plans report indicators for children attending Grade 2/3 and for children of the expected age for Grade 2/3, as well as broader age-based tabulations.
+
+When using MICS for cross-country research, it is useful to distinguish:
+
+- the **assessment tasks**;
+- the **MICS foundational-skills definitions**; and
+- the **population used for a particular indicator**.
+
+These are related, but they are not the same thing.
+
+## Next
+
+Reading has additional complications involving language, passage selection, practice items and skip patterns. Continue to [Understanding the MICS6 reading assessment](#c02-reading).

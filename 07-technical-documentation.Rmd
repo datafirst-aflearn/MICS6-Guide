@@ -1,0 +1,110 @@
+# Technical documentation {#c07-technical}
+
+The main guide is organised around the tasks a researcher needs to complete:
+
+```text
+get data
+   ↓
+understand the files
+   ↓
+prepare the data
+   ↓
+specify the survey design
+   ↓
+analyse
+```
+
+This final section documents what happens **under the hood**.
+
+It is intended for:
+
+- researchers who need to understand exactly how AFLEARN variables were constructed;
+- analysts adapting the harmonisation to additional MICS6 surveys;
+- reviewers checking reproducibility;
+- maintainers updating the processing scripts; and
+- users who encounter a country-specific coding issue.
+
+You do **not** need to read every page here before using the harmonised datasets.
+
+## What is documented here?
+
+| Page | Purpose |
+|---|---|
+| [FS harmonisation methods](#c07-fs-harmonisation) | How the non-reading selected-child variables are standardised |
+| [Reading-variable construction](#c07-reading-construction) | How passages, scores, accuracy, comprehension and `reading_status` are constructed |
+| [Country-specific issues](#c07-country-issues) | Survey-specific exceptions, repairs and comparability cautions |
+| [Variable crosswalks and dictionaries](#c07-crosswalks) | How to trace every harmonised variable back to its source |
+| [Why current_grade is not the child's grade](#c07-current-grade) | Why grade restarts within education levels and how to construct an administrative grade |
+| [Validation and reproducibility](#c07-validation) | Checks that should be run whenever the harmonisation is changed |
+
+## The two AFLEARN harmonisation products
+
+AFLEARN deliberately keeps reading separate from the broader selected-child file.
+
+```text
+UNICEF fs.sav
+      │
+      ├───────────────────────────────┐
+      │                               │
+      ▼                               ▼
+FS/background harmonisation      reading harmonisation
+      │                               │
+      ▼                               ▼
+mics6_fs_harmonized             mics6_reading_harmonized
+      │                               │
+      └──────────────┬────────────────┘
+                     ▼
+                analysis file
+```
+
+This separation is useful because reading requires much more country- and passage-specific processing than most other FS variables.
+
+The current processing scripts live in `Script/`:
+
+```text
+Script/harmonize-mics-fs-v1.0.R
+Script/harmonize-mics-reading-v1.1.R
+```
+
+Both read the survey folders in `Data/UNICEF/` and write to `Data/AFLEARN Harmonised Data/`. The FS script produces:
+
+```text
+mics6_fs_harmonized.dta
+mics6_fs_variable_crosswalk.xlsx
+```
+
+The reading script produces:
+
+```text
+mics6_reading_harmonized.dta
+```
+
+## Supported surveys
+
+The current scripts recognise these 18 country codes:
+
+```text
+BEN CAF COD COM GHA GMB GNB LSO MDG MWI NGA
+SLE STP SWZ TCD TGO TUN ZWE
+```
+
+Tunisia appears in more than one survey year in the current processing system.
+
+A new survey should never simply be added to the supported list and assumed to work. It should first pass the validation process described at the end of this section.
+
+## Reproducibility principle
+
+The harmonised file should never be the only record of a coding decision.
+
+A substantive decision should appear in at least one of:
+
+```text
+processing script
+crosswalk
+country notes
+validation record
+```
+
+and ideally in more than one.
+
+The purpose of this section is to make those decisions inspectable without forcing every user to read the entire R source code.

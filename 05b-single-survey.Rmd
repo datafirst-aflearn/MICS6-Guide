@@ -1,0 +1,257 @@
+# Setting up one MICS6 survey {#c05-single-survey}
+
+For a single MICS6 survey, the standard selected-child design uses:
+
+```text
+weight   = fsweight
+PSU      = PSU
+stratum  = stratum
+```
+
+This page shows how to set that design up in R and Stata.
+
+## First check the design variables
+
+Before creating a survey object:
+
+```{r eval=FALSE}
+library(haven)
+library(dplyr)
+
+d <- read_dta("Data/AFLEARN Harmonised Data/mics6_fs_harmonized.dta")
+
+d %>%
+  summarise(
+    n = n(),
+    missing_weight = sum(is.na(fsweight)),
+    missing_psu = sum(is.na(PSU)),
+    missing_stratum = sum(is.na(stratum)),
+    n_psu = n_distinct(PSU),
+    n_strata = n_distinct(stratum)
+  )
+```
+
+If you are using the AFLEARN harmonised file, confirm the final exact capitalisation of `PSU` in the production version.
+
+You should also check how many PSUs occur within each stratum:
+
+```{r eval=FALSE}
+d %>%
+  distinct(stratum, PSU) %>%
+  count(stratum, name = "n_psu") %>%
+  arrange(n_psu)
+```
+
+## R: the `survey` package
+
+```{r eval=FALSE}
+library(survey)
+
+des <- svydesign(
+  ids = ~PSU,
+  strata = ~stratum,
+  weights = ~fsweight,
+  data = d,
+  nest = TRUE
+)
+```
+
+`nest = TRUE` tells `survey` that PSU identifiers are nested within strata. This is a safe specification when PSU codes can repeat between strata.
+
+A weighted mean:
+
+```{r eval=FALSE}
+svymean(
+  ~pct_total_math,
+  design = des,
+  na.rm = TRUE
+)
+```
+
+A proportion for a 0/1 indicator:
+
+```{r eval=FALSE}
+svymean(
+  ~foundational_numeracy,
+  design = des,
+  na.rm = TRUE
+)
+```
+
+## R: `srvyr` for tidyverse-style analysis
+
+If you prefer `dplyr` syntax, `srvyr` wraps the `survey` package.
+
+```{r eval=FALSE}
+library(srvyr)
+
+des <- d %>%
+  as_survey_design(
+    ids = PSU,
+    strata = stratum,
+    weights = fsweight,
+    nest = TRUE
+  )
+```
+
+Then:
+
+```{r eval=FALSE}
+des %>%
+  summarise(
+    mean_math = survey_mean(
+      pct_total_math,
+      na.rm = TRUE,
+      vartype = c("se", "ci")
+    )
+  )
+```
+
+or by a subgroup:
+
+```{r eval=FALSE}
+des %>%
+  group_by(sex) %>%
+  summarise(
+    mean_math = survey_mean(
+      pct_total_math,
+      na.rm = TRUE,
+      vartype = c("se", "ci")
+    )
+  )
+```
+
+## Stata
+
+```stata
+svyset PSU [pw=fsweight], strata(stratum)
+```
+
+Check the design:
+
+```stata
+svydescribe
+```
+
+Then estimate, for example:
+
+```stata
+svy: mean pct_total_math
+```
+
+For a 0/1 foundational-numeracy indicator:
+
+```stata
+svy: mean foundational_numeracy
+```
+
+The mean of a variable coded 0/1 is the estimated proportion equal to 1.
+
+## Why not use `HH1` automatically as the PSU?
+
+MICS datasets contain both the original cluster identifier (`HH1`) and design variables such as `PSU`.
+
+For many surveys these may correspond closely, but the safest approach is to use the **sampling-error design variables supplied with the released data**.
+
+In the standard MICS6 naming convention:
+
+```text
+PSU      primary sampling unit
+stratum  sample stratum
+```
+
+IPUMS also harmonises these as `PSU` and `STRATUM`.
+
+## Lonely PSUs
+
+Variance estimation within a stratum relies on having more than one sampled PSU in that stratum.
+
+Occasionally, after restricting to a domain or because of a particular survey design, software may encounter a stratum with only one contributing PSU.
+
+In R, the `survey` package provides several options for handling these "lonely PSUs". Do not choose one mechanically. First determine whether the problem exists in the full survey design or only after defining a subpopulation.
+
+A useful default for analysis workflows where lonely domains occur is:
+
+```{r eval=FALSE}
+options(
+  survey.lonely.psu = "adjust",
+  survey.adjust.domain.lonely = TRUE
+)
+```
+
+but the chosen treatment should be documented.
+
+In Stata, inspect singleton-unit messages and the survey design rather than silently ignoring them.
+
+## Do not filter the raw data before defining the survey design
+
+This is especially important when estimating a subgroup.
+
+Suppose you want results for children aged 7–14.
+
+Avoid:
+
+```{r eval=FALSE}
+# Not recommended for domain inference
+d_7_14 <- d %>%
+  filter(age >= 7, age <= 14)
+
+des <- svydesign(
+  ids = ~PSU,
+  strata = ~stratum,
+  weights = ~fsweight,
+  data = d_7_14,
+  nest = TRUE
+)
+```
+
+Instead, define the survey design using the full relevant sample and then restrict the **design object**:
+
+```{r eval=FALSE}
+des <- svydesign(
+  ids = ~PSU,
+  strata = ~stratum,
+  weights = ~fsweight,
+  data = d,
+  nest = TRUE
+)
+
+des_7_14 <- subset(
+  des,
+  age >= 7 & age <= 14
+)
+```
+
+With `srvyr`:
+
+```{r eval=FALSE}
+des_7_14 <- des %>%
+  filter(age >= 7, age <= 14)
+```
+
+This preserves the information survey software needs for correct domain/subpopulation variance estimation.
+
+## Stata subpopulations
+
+The same principle applies in Stata.
+
+Rather than physically dropping everyone outside the domain and then estimating:
+
+```stata
+svy, subpop(if age >= 7 & age <= 14): ///
+    mean pct_total_math
+```
+
+For a more complex domain, create a 0/1 indicator:
+
+```stata
+gen age7_14 = inrange(age,7,14)
+
+svy, subpop(age7_14): mean pct_total_math
+```
+
+`subpop()` tells Stata that the target is a subpopulation of the original survey sample.
+
+## Next
+
+If your analysis contains more than one MICS survey, additional steps are required. Continue to [Combining MICS6 surveys](#c05-pooling).

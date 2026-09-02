@@ -1,0 +1,129 @@
+# Worked example 1: Who is assessed? {#c06-who-assessed}
+
+## Research question
+
+> Who is represented in the MICS6 selected-child sample, and who is eligible for the Foundational Learning Skills assessment?
+
+This is a useful first analysis because the `fs` file contains one randomly selected child aged 5–17 per household, while the FLS assessment targets ages 7–14.
+
+## What to examine
+
+For each survey, describe:
+
+- age distribution of the `fs` sample;
+- proportion aged 7–14;
+- current school attendance by age;
+- grade among currently enrolled children; and
+- number of children contributing to learning outcomes.
+
+## Weighted age distribution
+
+### R
+
+```{r eval=FALSE}
+des %>%
+  group_by(country_iso3, age) %>%
+  summarise(
+    share = survey_mean(
+      vartype = "ci",
+      proportion = TRUE
+    )
+  )
+```
+
+For one country:
+
+```{r eval=FALSE}
+country_des <- des %>%
+  filter(country_iso3 == "MWI")
+
+country_des %>%
+  group_by(age) %>%
+  summarise(
+    share = survey_mean(proportion = TRUE)
+  )
+```
+
+### Stata
+
+```stata
+svy: proportion age if country_iso3 == "MWI"
+```
+
+## School attendance by age
+
+The harmonised variable:
+
+```text
+enrolled
+```
+
+comes from `CB7`.
+
+In standard MICS coding:
+
+```text
+1 = yes
+2 = no
+```
+
+### R
+
+```{r eval=FALSE}
+des %>%
+  filter(age >= 7, age <= 14) %>%
+  mutate(
+    in_school = enrolled == 1
+  ) %>%
+  group_by(country_iso3, age) %>%
+  summarise(
+    enrolled_share = survey_mean(
+      in_school,
+      vartype = "ci",
+      na.rm = TRUE
+    )
+  )
+```
+
+### Stata
+
+```stata
+gen in_school = enrolled == 1 if enrolled < .
+
+svy, subpop(if inrange(age,7,14)): ///
+    mean in_school, over(country_iso3 age)
+```
+
+## A useful first figure
+
+Plot school attendance by age for each country.
+
+Suggested design:
+
+```text
+x-axis: age 7–14
+y-axis: proportion currently attending
+line: country
+```
+
+This immediately shows how much the composition of the assessed population differs across countries as children get older.
+
+## Interpretation
+
+The important point is not simply whether school attendance is high or low.
+
+MICS allows researchers to see that:
+
+- the learning assessment population is defined by **age and household sampling**, not school enrolment;
+- out-of-school children remain part of the target population; and
+- the composition of children in a particular grade can differ substantially across countries.
+
+This is one reason age-based and grade-based learning estimates answer different questions.
+
+## Output to add after running
+
+Add:
+
+1. a figure of current attendance by age;
+2. a small table showing the unweighted `fs` N and FLS-age N by survey; and
+3. one paragraph noting the main cross-country patterns.

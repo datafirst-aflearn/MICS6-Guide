@@ -1,0 +1,49 @@
+book_filename: "mics6-guide"
+output_dir: docs
+delete_merged_file: true
+knit_root_dir: "."
+edit: https://github.com/datafirst-aflearn/MICS6-Guide/edit/main/%s
+view: https://github.com/datafirst-aflearn/MICS6-Guide/blob/main/%s
+language:
+  ui:
+    chapter_name: " "
+rmd_files:
+  - index.Rmd
+  - 01-getting-mics6-data.Rmd
+  - 01a-unicef-mics.Rmd
+  - 01b-ipums-mics.Rmd
+  - 02-whats-in-mics6-data.Rmd
+  - 02a-files-identifiers.Rmd
+  - 02b-fs-sample.Rmd
+  - 02c-foundational-learning.Rmd
+  - 02d-reading-assessment.Rmd
+  - 02e-numeracy-assessment.Rmd
+  - 03a-organise-download.Rmd
+  - 03b-merge-files.Rmd
+  - 03c-harmonise-countries.Rmd
+  - 03d-reading-variables.Rmd
+  - 04a-ipums-reading.Rmd
+  - 05-survey-design.Rmd
+  - 05a-weights.Rmd
+  - 05b-single-survey.Rmd
+  - 05c-pooling-surveys.Rmd
+  - 05d-standard-errors.Rmd
+  - 05e-survey-checklist.Rmd
+  - 06-worked-examples.Rmd
+  - 06a-prepare-analysis.Rmd
+  - 06b-who-assessed.Rmd
+  - 06c-numeracy-distributions.Rmd
+  - 06d-reading-status.Rmd
+  - 06e-reading-language.Rmd
+  - 06f-wealth-inequality.Rmd
+  - 06g-schooling-status.Rmd
+  - 06h-grade-trajectories.Rmd
+  - 06i-school-timing.Rmd
+  - 07-technical-documentation.Rmd
+  - 07a-fs-harmonisation.Rmd
+  - 07b-reading-construction.Rmd
+  - 07c-country-specific-issues.Rmd
+  - 07d-crosswalks.Rmd
+  - 07e-current-grade.Rmd
+  - 07f-validation.Rmd
+after_render: ["R/publish-nav.R"]

@@ -1,0 +1,129 @@
+# Country-specific issues {#c07-country-issues}
+
+MICS6 is highly standardised, but country datasets are not identical.
+
+The AFLEARN harmonisation therefore contains explicit country-specific logic.
+
+This page summarises the issues already identified in the current processing system. The processing scripts and Excel crosswalk remain the authoritative implementation record.
+
+## Reading-specific issues
+
+| Survey/country | Issue | AFLEARN treatment |
+|---|---|---|
+| Sierra Leone | Some records have attempted/incorrect word counts reversed | Swap where attempted is below incorrect and the incorrect count is observed |
+| Zimbabwe | Comprehension variables use a shifted numbering pattern | Rename before common processing |
+| Comoros | Some comprehension variables are offset within the `FL21B*` series | Apply targeted renaming rather than shifting the entire block |
+| São Tomé and Príncipe | Word counts can remain populated after early refusal/practice failure | Clear counts before constructing reading scores |
+| Madagascar | Similar early-refusal issue; multiple passage blocks also require cleaning | Clear invalid passage-specific counts before scoring |
+| Central African Republic | Early refusal/practice routing can leave word counts | Clear invalid counts before scoring |
+| Malawi | English and Chichewa stored as separate passages; some children attempt Chichewa only | Retain both passages; move Chichewa-only attempt into primary analysis slots |
+| Chad | School-language information can be split across `FL9A` and `FL9B` | Construct a common `lang_school` field |
+| Zimbabwe | Passage language requires multiple pieces of routing information | Infer using school language, home language and story choice |
+| Nigeria, Eswatini, Lesotho, Madagascar, Malawi, Zimbabwe | Passage-language coding differs from single-language survey pattern | Apply survey-specific passage-language rules |
+
+These exceptions are the reason the reading file should be generated from the original UNICEF data rather than by blindly appending similarly named fields.
+
+## FS/background issues
+
+| Survey/country | Issue | AFLEARN treatment |
+|---|---|---|
+| Tunisia 2018 | Some common FS themes/fields are absent | Create harmonised columns as missing where appropriate |
+| DR Congo | School-type coding uses a different network taxonomy | Retain raw codes; document rather than force into standard categories |
+| Tunisia | School-type "other" category differs from common coding | Retain country coding and document |
+| Gambia | School type unavailable in current harmonisation | Missing |
+| Togo | School type unavailable in current harmonisation | Missing |
+| Sierra Leone | Discipline attitude item is stored in a different source field | Map the appropriate country-specific source |
+| Sierra Leone | `fl_child_result` is absent in the current source layout | Retain as missing |
+| Malawi | Parent-education raw category meanings differ across mother/father fields | Apply variable-specific education maps |
+| Tunisia 2018 | Child-labour module absent | Harmonised child-labour fields created as missing |
+
+## Variables that retain country-specific meaning
+
+Even where no special code fix is required, some harmonised variables should **not** be interpreted as common cross-country categories.
+
+These include:
+
+```text
+region
+school_type
+raw education levels
+raw grade/year
+lang_home
+lang_school
+```
+
+A common column name means:
+
+> this is the analogous source concept in each survey
+
+not:
+
+> every numeric category has exactly the same substantive meaning in every country.
+
+## Education-level maps
+
+AFLEARN does harmonise broad education levels into:
+
+```text
+0 Early childhood / pre-primary
+1 Primary
+2 Lower secondary
+3 Upper secondary
+4 Vocational / technical
+5 Higher / tertiary
+8 Don't know
+9 Other / missing special category
+```
+
+But the country mapping required to reach those broad levels differs.
+
+Examples include:
+
+- technical/vocational programmes embedded within secondary schooling;
+- standalone vocational programmes;
+- education systems without separately coded lower secondary;
+- Tunisia adult-education/literacy categories; and
+- Zimbabwe vocational and tertiary subtypes.
+
+Every raw-to-harmonised mapping is written to the `level_map` sheet.
+
+## Survey year matters
+
+Do not assume that one country-specific rule applies forever.
+
+If a country appears in multiple survey years:
+
+```text
+country
++
+survey year
+```
+
+should be treated as the unit for validating:
+
+- questionnaire wording;
+- variable names;
+- coding;
+- passage languages;
+- education structure; and
+- country-specific repairs.
+
+A new survey round should be reviewed even if the same country was supported previously.
+
+## How to add a new country safely
+
+Do not begin by writing a large block of special-case code.
+
+Use this sequence:
+
+```text
+1. compare questionnaire with standard MICS6 questionnaire
+2. inspect fs.sav and hl.sav variable names
+3. run standard mappings
+4. identify fields that fail or differ
+5. add the smallest country-specific exception necessary
+6. document the exception
+7. validate distributions and published indicators
+```
+
+A country-specific fix should be narrow enough that unexpected changes in a future source file trigger an error rather than silently producing a plausible-looking dataset.

@@ -1,0 +1,30 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Bookdown / knitr build artefacts at the project root only.
+# Leading slashes matter: docs/*_files/ holds published figures and assets.
+/_bookdown_files/
+/*_cache/
+/*_files/
+
+# Nav page build artefact at project root (the copy in docs/ is published)
+/nav-guide.html
+
+# Local Stata scratch files
+*.log
+profile.do
+stata*.do
+
+# MICS microdata and extracts (never commit) -- keep the empty folders
+Data/UNICEF/*
+!Data/UNICEF/.gitkeep
+Data/IPUMS/*
+!Data/IPUMS/.gitkeep
+Data/AFLEARN Harmonised Data/*
+!Data/AFLEARN Harmonised Data/.gitkeep
+*.sav
+*.zip
+*.dta
+*.rds

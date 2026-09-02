@@ -1,0 +1,145 @@
+# Worked example 6: In-school and out-of-school children {#c06-schooling-status}
+
+## Research question
+
+> At the same age, how does learning differ between children who are currently in school and those who are out of school?
+
+This is one of the distinctive advantages of a household-based learning assessment.
+
+A school-based assessment cannot observe children who are not enrolled or not attending the sampled schools. MICS can.
+
+## Define current schooling status
+
+The harmonised variable:
+
+```text
+enrolled
+```
+
+records whether the child attended school or an early childhood education programme during the current school year.
+
+For school-age analysis:
+
+```{r eval=FALSE}
+d <- d %>%
+  mutate(
+    in_school = case_when(
+      enrolled == 1 ~ 1,
+      enrolled == 2 ~ 0,
+      TRUE ~ NA_real_
+    )
+  )
+```
+
+Re-create the design object after adding the variable.
+
+## Why compare within age?
+
+A simple comparison of all in-school and out-of-school children can be misleading because the groups may have very different age distributions.
+
+Older adolescents are more likely to have left school in many settings and have also had more potential exposure to schooling.
+
+Compare children of the same age, or adjust for age.
+
+## Descriptive comparison by age
+
+### R
+
+```{r eval=FALSE}
+des %>%
+  filter(
+    age >= 10,
+    age <= 14
+  ) %>%
+  group_by(
+    country_iso3,
+    age,
+    in_school
+  ) %>%
+  summarise(
+    mean_num = survey_mean(
+      numeracy_total,
+      vartype = "ci",
+      na.rm = TRUE
+    )
+  )
+```
+
+### Stata
+
+```stata
+svy, subpop(if inrange(age,10,14)): ///
+    mean numeracy_total, ///
+    over(country_iso3 age in_school)
+```
+
+## Age-adjusted comparison
+
+### R
+
+```{r eval=FALSE}
+model <- svyglm(
+  numeracy_total ~ factor(age) + factor(in_school),
+  design = subset(
+    des,
+    age >= 10 & age <= 14
+  )
+)
+
+summary(model)
+```
+
+This estimates the association between current school attendance and numeracy conditional on age.
+
+It is **not a causal estimate of the effect of attending school**.
+
+Children who remain in school differ from children who leave school in many observed and unobserved ways.
+
+## Reading
+
+The same analysis can be performed for reading, but first define the relevant reading population using `reading_status`.
+
+For example:
+
+```{r eval=FALSE}
+read_des <- des %>%
+  filter(
+    age >= 10,
+    age <= 14,
+    reading_status %in% c(7, 8)
+  )
+```
+
+Then compare:
+
+```text
+max_reading_accuracy
+```
+
+or another clearly defined reading outcome.
+
+## Interpretation
+
+The value of this analysis is descriptive:
+
+> What learning levels are observed among children who are currently in school and among children who are not, at comparable ages?
+
+Do not write:
+
+> School attendance increases numeracy by X points.
+
+The household-survey data do not identify that causal effect without a separate research design.
+
+## Suggested figure
+
+For ages 10–14:
+
+```text
+x-axis: age
+y-axis: mean numeracy score
+two lines: in school / out of school
+```
+
+Facet by country or select illustrative countries.
+
+Also show the number of out-of-school observations contributing to each estimate; some age-country cells may be too small for useful inference.

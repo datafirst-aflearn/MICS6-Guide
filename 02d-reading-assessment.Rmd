@@ -1,0 +1,213 @@
+# Understanding the MICS6 reading assessment {#c02-reading}
+
+Reading is the most complex part of the MICS6 Foundational Learning Skills data.
+
+At first glance the assessment appears straightforward: a child reads a story and answers comprehension questions. In the microdata, however, several earlier decisions determine **whether the child reaches the story, which story they receive, and how their subsequent data should be interpreted**.
+
+Understanding this sequence is essential before constructing reading outcomes.
+
+## Overview of the reading assessment
+
+At a high level, the assessment involves:
+
+```text
+Eligible child age 7–14
+          │
+          ▼
+Permission / child participation
+          │
+          ▼
+Determine assessment language
+          │
+          ▼
+Does the child agree to read?
+          │
+          ▼
+Practice / routing where applicable
+          │
+          ▼
+Read story
+          │
+          ├── words attempted
+          ├── words missed / read incorrectly
+          │
+          ▼
+Comprehension questions
+          │
+          ├── 3 literal
+          └── 2 inferential
+```
+
+The exact country questionnaire should always be consulted because language options and country adaptations differ.
+
+## Assessment language is part of the data-generating process
+
+The standard MICS6 questionnaire asks about the language the child speaks at home and, for children with schooling experience, the language used by teachers.
+
+The questionnaire then uses this information to determine whether an appropriate reading booklet is available and which language should be used for the reading task.
+
+In the standard questionnaire:
+
+- `FL7` records the language spoken most of the time at home;
+- `FL9A/FL9B` asks about the language used by teachers for children with schooling experience; and
+- the subsequent reading instructions route the child to an available reading booklet/language.
+
+This means that reading performance cannot always be separated from **assessment-language availability and assignment**.
+
+In multilingual surveys, countries may have more than one reading passage. As discussed in [Getting data from IPUMS MICS](#c01-ipums), this is also why the IPUMS reading variables are unsafe to use for multi-passage countries.
+
+## Not every eligible child attempts the story
+
+There are several reasons an age-eligible child may have no story-reading result.
+
+For example:
+
+```text
+age 7–14
+   │
+   ├── permission not given
+   ├── child does not participate
+   ├── suitable assessment language unavailable
+   ├── child declines reading
+   ├── routed out through practice sequence
+   └── attempts main story
+```
+
+These pathways do not all have the same substantive meaning.
+
+A child who was never offered an appropriate passage because of language availability is different from a child who attempted a passage but could not read it. Treating both simply as `NA` obscures that distinction.
+
+This is why AFLEARN constructs a research-ready **reading-status variable**. The variable records whether the child reached the reading task and, where they did not, the reason for the missing reading result.
+
+The construction is provided in [Constructing MICS6 reading outcomes](#c03-reading).
+
+## Practice items and routing
+
+The standard MICS6 reading sequence contains practice/routing items before the main story for some children.
+
+The routing depends partly on age and schooling experience. Researchers should therefore **not infer inability to read simply because the main story variables are missing**.
+
+The correct interpretation requires following the questionnaire skip pattern.
+
+AFLEARN's processing script does this explicitly rather than relying on missingness in the final story variables.
+
+## Oral reading accuracy
+
+For children who attempt the main story, the interviewer records reading performance.
+
+The official foundational-reading definition requires the child to read **at least 90% of the story words correctly**.
+
+Conceptually:
+
+```text
+words read correctly
+--------------------  >= 0.90
+ total story words
+```
+
+The difficulty is that the denominator — **total story words** — is not provided as a simple analysis variable in all released country datasets.
+
+Moreover, story length can vary with country and language adaptation.
+
+::: {.alternativebox-header}
+**You cannot calculate the 90% accuracy criterion correctly without the passage length**
+:::
+
+::: {.alternativebox}
+Counting only the child's attempted or incorrect words is insufficient unless you also know how many words were in the passage the child received.
+:::
+
+AFLEARN therefore created a **passage-length variable** from the country assessment materials and an **assessment-language variable** identifying the relevant passage.
+
+These are used in the research-ready reading construction in Section 3.
+
+## Literal comprehension
+
+Children who progress through the reading task are asked **three literal comprehension questions**.
+
+Literal questions ask about information stated directly in the story.
+
+Under the MICS foundational-reading definition, the child must answer **all three** correctly to satisfy the literal-comprehension component.
+
+## Inferential comprehension
+
+Children are also asked **two inferential comprehension questions**.
+
+These require the child to draw meaning from information that is implied rather than simply repeat a stated fact.
+
+The child must answer **both** correctly to satisfy the inferential-comprehension component.
+
+## The overall foundational reading indicator
+
+The official MICS definition combines all three components:
+
+```text
+READING ACCURACY
+>= 90% of story words correct
+           │
+           AND
+           │
+3/3 LITERAL QUESTIONS CORRECT
+           │
+           AND
+           │
+2/2 INFERENTIAL QUESTIONS CORRECT
+           │
+           ▼
+FOUNDATIONAL READING SKILLS
+```
+
+UNICEF's MICS6 statistical analysis manual describes this as a conjunctive indicator: the child must satisfy the accuracy, literal-comprehension and inferential-comprehension requirements.
+
+## Why the raw reading variables are not enough for our purposes
+
+For multi-country analysis, researchers face three related problems.
+
+### 1. Passage length
+
+The released datasets do not provide a single harmonised variable giving the number of words in the passage administered to each child.
+
+### 2. Assessment language and passage
+
+Countries with more than one reading language can have multiple sets of passage variables. Researchers need to identify which passage the child actually attempted.
+
+### 3. Complex skip patterns
+
+A blank story result can arise for different reasons. Without reconstructing the questionnaire pathway, it is easy to classify children incorrectly or silently change the analysis sample.
+
+AFLEARN's research-ready variables address all three problems.
+
+## What AFLEARN adds
+
+The Section 3 processing produces variables that make the reading data easier to analyse transparently, including:
+
+- **assessment language**;
+- **passage length**;
+- **reading status**;
+- reading accuracy measures;
+- literal-comprehension measures;
+- inferential-comprehension measures; and
+- an overall foundational-reading indicator.
+
+The detailed harmonisation and country-specific derivations will be documented separately in the technical appendix. Most users of this guide do not need to reproduce that work; they need to understand what the derived variables mean and how to use them correctly.
+
+## A note on cross-country comparisons
+
+Reading comparisons deserve more caution than numeracy comparisons because reading is inherently language dependent.
+
+Differences across countries may reflect not only underlying reading skill but also features such as:
+
+- language of instruction;
+- language spoken at home;
+- language in which the child was assessed;
+- linguistic characteristics of the assessment language;
+- country adaptation of the story; and
+- the relationship between the assessment language and the child's schooling experience.
+
+The MICS6 assessment was designed for national monitoring and uses country/language adaptation. Researchers should therefore avoid interpreting a difference in raw reading performance across countries as if every child completed an identical language-neutral test.
+
+These issues do not make cross-country analysis impossible, but they should shape the research question and interpretation.
+
+## Next
+
+The numeracy assessment has a simpler common structure. See [Understanding the MICS6 numeracy assessment](#c02-numeracy).

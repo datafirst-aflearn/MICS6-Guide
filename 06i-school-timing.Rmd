@@ -1,0 +1,175 @@
+# Worked example 8: Timing within the school year {#c06-school-timing}
+
+## Research question
+
+> If two children are both labelled "Grade 3", have they necessarily had the same amount of exposure to Grade 3 instruction?
+
+No.
+
+MICS fieldwork can occur at different points in the school year across countries. A Grade 3 child assessed one month after the school year begins has had less Grade 3 exposure than a Grade 3 child assessed near the end of the year.
+
+This matters when interpreting cross-country grade trajectories.
+
+## What you need
+
+AFLEARN's harmonised FS file already contains:
+
+```text
+interview_month
+```
+
+but the current processing does **not** contain a harmonised variable measuring the child's position within the country's school year.
+
+For this example, create:
+
+```text
+school_month
+```
+
+where:
+
+```text
+0 = beginning of school year
+1 = one month after beginning
+...
+```
+
+This requires a country-level lookup table giving the school-year start month.
+
+## Example lookup
+
+Illustrative structure:
+
+```text
+country_iso3   school_start_month
+BEN            ...
+GHA            ...
+MWI            ...
+```
+
+The values must be verified from country education calendars or survey documentation before publication.
+
+## Convert interview month to months through school year
+
+### R
+
+```{r eval=FALSE}
+d <- d %>%
+  left_join(
+    school_calendar,
+    by = "country_iso3"
+  ) %>%
+  mutate(
+    school_month = (
+      interview_month - school_start_month
+    ) %% 12
+  )
+```
+
+Depending on survey timing and holidays, a simple month difference may need country-specific adjustment.
+
+## Construct grade progress
+
+For children in a comparable grade system:
+
+```{r eval=FALSE}
+d <- d %>%
+  mutate(
+    gradeprogress =
+      current_grade + school_month / 12
+  )
+```
+
+Thus:
+
+```text
+Grade 3, start of year       ≈ 3.0
+Grade 3, six months in       ≈ 3.5
+Grade 4, start of year       ≈ 4.0
+```
+
+This is an approximation to instructional exposure, not a literal measure of time in school.
+
+## Fit a trajectory
+
+### R
+
+```{r eval=FALSE}
+model <- svyglm(
+  numeracy_total ~
+    factor(country_iso3) *
+    (gradeprogress + I(gradeprogress^2)),
+  design = subset(
+    des,
+    enrolled == 1 &
+      current_level_h == 1 &
+      gradeprogress >= 1 &
+      gradeprogress <= 6
+  )
+)
+
+summary(model)
+```
+
+Test whether trajectories differ across countries:
+
+```{r eval=FALSE}
+library(regTermTest)
+
+regTermTest(
+  model,
+  ~ factor(country_iso3):gradeprogress +
+    factor(country_iso3):I(gradeprogress^2)
+)
+```
+
+Depending on the fitted model and package behaviour, the exact joint-test syntax may need adjustment. The production script should verify the coefficient names and test matrix explicitly.
+
+### Stata
+
+```stata
+gen gradeprogress = current_grade + school_month/12
+
+svy: regress numeracy_total ///
+    i.country_iso3##c.gradeprogress##c.gradeprogress ///
+    if enrolled==1 & current_level_h==1 & ///
+       inrange(gradeprogress,1,6)
+
+testparm i.country_iso3#c.gradeprogress ///
+         i.country_iso3#c.gradeprogress#c.gradeprogress
+```
+
+## Predicted trajectories
+
+In Stata:
+
+```stata
+margins country_iso3, ///
+    at(gradeprogress=(1(0.25)6))
+
+marginsplot
+```
+
+In R, generate a prediction grid and use `predict()` with standard errors, or use a survey-compatible marginal-estimation package after verifying its handling of `svyglm`.
+
+## Why this example is more advanced
+
+`gradeprogress` solves only one comparability problem.
+
+It does **not** account for:
+
+- differences in official school-entry age;
+- grade repetition;
+- interruptions to schooling;
+- variation in instructional time;
+- attendance;
+- curriculum differences; or
+- differences in the meaning of grade across education systems.
+
+It should therefore be described as an adjustment for **survey timing within the school year**, not a complete measure of schooling exposure.
+
+## Suggested use in the guide
+
+Keep this as the final, advanced worked example.
+
+It demonstrates how the rich timing information in MICS can improve cross-country comparisons while also showing why researchers need to be explicit about the assumptions behind derived variables.

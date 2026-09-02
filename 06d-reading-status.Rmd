@@ -1,0 +1,132 @@
+# Worked example 3: Why is the reading outcome missing? {#c06-reading-status}
+
+## Research question
+
+> When a child has no reading score, what happened in the assessment?
+
+A missing reading score does not have one meaning.
+
+AFLEARN's `reading_status` reconstructs the reading pathway.
+
+The current coding is:
+
+| Code | Meaning |
+|---:|---|
+| 0 | Not interviewed |
+| 1 | Outside FLS reading age |
+| 2 | Caregiver consent not given |
+| 3 | Child consent not given |
+| 4 | Assessment-language mismatch |
+| 5 | Child did not want to read the story |
+| 6 | Failed the practice sentence/questions |
+| 7 | Attempted a reading passage |
+| 8 | Met the foundational-reading criterion |
+| 9 | Not classified / inconsistent routing |
+
+Codes 7 and 8 both indicate that the child reached the passage; code 8 additionally identifies children meeting the foundational-reading criterion.
+
+## Describe the pathway among ages 7–14
+
+### R
+
+```{r eval=FALSE}
+reading_status_tab <- des %>%
+  filter(age >= 7, age <= 14) %>%
+  group_by(country_iso3, reading_status) %>%
+  summarise(
+    share = survey_mean(
+      proportion = TRUE,
+      vartype = "ci",
+      na.rm = TRUE
+    )
+  )
+```
+
+### Stata
+
+```stata
+svy, subpop(if inrange(age,7,14)): ///
+    proportion reading_status, over(country_iso3)
+```
+
+## A simpler attempted/not-attempted distinction
+
+```{r eval=FALSE}
+d <- d %>%
+  mutate(
+    reading_attempted = reading_status %in% c(7, 8)
+  )
+```
+
+Then:
+
+```{r eval=FALSE}
+des <- d %>%
+  as_survey_design(
+    ids = psu_pool,
+    strata = stratum_pool,
+    weights = fsweight,
+    nest = TRUE
+  )
+
+des %>%
+  filter(age >= 7, age <= 14) %>%
+  group_by(country_iso3) %>%
+  summarise(
+    attempted = survey_mean(
+      reading_attempted,
+      vartype = "ci",
+      na.rm = TRUE
+    )
+  )
+```
+
+## Why not code all non-attempts as zero reading skill?
+
+Because these categories describe different processes.
+
+For example:
+
+```text
+language mismatch
+```
+
+means the survey could not offer an appropriate reading passage under the questionnaire routing.
+
+That is not direct evidence that the child cannot read.
+
+Similarly, lack of caregiver consent is a nonresponse event, not an observed low score.
+
+By contrast, failing the practice sequence is much closer to evidence about the child's reading performance.
+
+The appropriate treatment depends on the research question.
+
+## Recommended reporting
+
+Whenever reading results exclude a substantial share of age-eligible children, report:
+
+```text
+% of target-age children with an attempted passage
+```
+
+alongside the learning outcome.
+
+This makes assessment coverage visible rather than allowing it to disappear into missing values.
+
+## Suggested figure
+
+A stacked bar by country:
+
+```text
+attempted passage
+practice-route non-attempt
+language mismatch
+consent/refusal
+other
+```
+
+Keep categories substantively meaningful rather than displaying all ten numeric codes if several are rare.
+
+## Output to add after running
+
+Add one figure and identify countries where assessment coverage is materially lower than the nominal 7–14 target population.

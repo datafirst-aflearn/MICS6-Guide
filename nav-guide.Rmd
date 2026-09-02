@@ -1,0 +1,535 @@
+---
+pagetitle: "AFLEARN MICS6 Analysis Guide"
+---
+
+```{=html}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --af-navy: #eef3f7;
+  --af-on: #0d0d52;
+  --af-card: #ffffff;
+  --af-chip: #d6e8ff;
+  --af-bright: #0049ff;
+  --af-cyan: #0dd8f9;
+  --af-orange: #ffad44;
+  --af-muted: rgba(13, 13, 82, 0.68);
+  --af-soft: rgba(13, 13, 82, 0.46);
+  --af-hairline: rgba(13, 13, 82, 0.12);
+  --af-card-on: #0d0d52;
+  --af-card-muted: rgba(13, 13, 82, 0.66);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--af-navy);
+  color: var(--af-on);
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.af-wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---------- Nav ---------- */
+.af-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--af-navy);
+  border-bottom: 1px solid var(--af-hairline);
+}
+
+.af-nav-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 60px;
+}
+
+.af-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--af-on);
+  flex: 0 0 auto;
+}
+
+.af-brand img { height: 30px; width: 30px; border-radius: 8px; display: block; }
+
+.af-brand span {
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+}
+
+.af-nav-spacer { flex: 1 1 auto; }
+
+.af-search {
+  position: relative;
+  flex: 0 1 340px;
+}
+
+.af-search input {
+  width: 100%;
+  padding: 8px 12px 8px 34px;
+  border: 1px solid var(--af-hairline);
+  border-radius: 999px;
+  background: var(--af-card);
+  color: var(--af-on);
+  font-family: inherit;
+  font-size: 0.87rem;
+  outline: none;
+}
+
+.af-search input::placeholder { color: var(--af-soft); }
+
+.af-search input:focus {
+  border-color: var(--af-bright);
+  box-shadow: 0 0 0 3px rgba(0, 73, 255, 0.14);
+}
+
+.af-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  color: var(--af-soft);
+  pointer-events: none;
+}
+
+.af-kbd {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.68rem;
+  color: var(--af-soft);
+  border: 1px solid var(--af-hairline);
+  border-radius: 5px;
+  padding: 1px 5px;
+  pointer-events: none;
+}
+
+.af-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  background: var(--af-card);
+  border: 1px solid var(--af-hairline);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(13, 13, 82, 0.14);
+  display: none;
+  padding: 6px;
+}
+
+.af-results.open { display: block; }
+
+.af-results a {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--af-card-on);
+  font-size: 0.86rem;
+  line-height: 1.3;
+}
+
+.af-results a small {
+  display: block;
+  color: var(--af-card-muted);
+  font-size: 0.74rem;
+  margin-top: 2px;
+}
+
+.af-results a:hover,
+.af-results a.active { background: var(--af-chip); }
+
+.af-results .af-empty {
+  padding: 10px;
+  color: var(--af-card-muted);
+  font-size: 0.84rem;
+}
+
+.af-nav-link {
+  color: var(--af-bright);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.87rem;
+  flex: 0 0 auto;
+}
+
+.af-nav-link:hover { text-decoration: underline; }
+
+.af-gh { color: var(--af-on); display: flex; align-items: center; flex: 0 0 auto; }
+.af-gh:hover { color: var(--af-bright); }
+.af-gh svg { width: 19px; height: 19px; }
+
+/* ---------- Hero ---------- */
+.af-hero {
+  display: grid;
+  grid-template-columns: 1.35fr 0.65fr;
+  gap: 28px;
+  align-items: center;
+  padding: 34px 0 26px;
+}
+
+.af-hero h1 {
+  margin: 0 0 8px;
+  font-size: 2rem;
+  line-height: 1.15;
+  font-weight: 700;
+  color: var(--af-bright);
+  letter-spacing: -0.01em;
+}
+
+.af-hero p {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--af-muted);
+  max-width: 56ch;
+}
+
+.af-lockup { text-align: right; }
+.af-lockup img { max-width: 190px; width: 100%; height: auto; display: inline-block; }
+
+/* ---------- Cards ---------- */
+.af-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--af-soft);
+  margin: 10px 0 12px;
+}
+
+.af-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding-bottom: 44px;
+}
+
+.af-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--af-card);
+  border: 1px solid var(--af-hairline);
+  border-radius: 14px;
+  padding: 18px;
+  text-decoration: none;
+  color: var(--af-card-on);
+  box-shadow: 0 2px 10px rgba(13, 13, 82, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.af-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(13, 13, 82, 0.12);
+  border-color: var(--af-orange);
+}
+
+.af-card-icon { width: 34px; height: 34px; display: block; }
+
+.af-card h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.af-chip {
+  align-self: flex-start;
+  background: var(--af-chip);
+  color: var(--af-on);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.af-card p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--af-card-muted);
+}
+
+.af-foot {
+  border-top: 1px solid var(--af-hairline);
+  padding: 18px 0 34px;
+  font-size: 0.8rem;
+  color: var(--af-soft);
+}
+
+.af-foot a { color: var(--af-bright); text-decoration: none; }
+.af-foot a:hover { text-decoration: underline; }
+
+@media (max-width: 900px) {
+  .af-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .af-hero { grid-template-columns: 1fr; }
+  .af-lockup { text-align: left; }
+}
+
+@media (max-width: 640px) {
+  .af-grid { grid-template-columns: 1fr; }
+  .af-search { flex-basis: 100%; order: 3; }
+  .af-nav-inner { height: auto; flex-wrap: wrap; padding: 10px 0; }
+  .af-hero h1 { font-size: 1.6rem; }
+}
+</style>
+
+<nav class="af-nav">
+  <div class="af-wrap af-nav-inner">
+    <a class="af-brand" href="index.html">
+      <img src="files/AFLEARN-mark-nav.png"
+           onerror="this.onerror=null;this.src='files/AFLEARN-mark-nav.svg'"
+           alt="AFLEARN">
+      <span>MICS6 Analysis Guide</span>
+    </a>
+    <div class="af-nav-spacer"></div>
+    <div class="af-search">
+      <svg class="af-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path>
+      </svg>
+      <input id="af-q" type="text" autocomplete="off" spellcheck="false"
+             placeholder="Search the guide" aria-label="Search the guide">
+      <span class="af-kbd">Ctrl K</span>
+      <div id="af-results" class="af-results"></div>
+    </div>
+    <a class="af-nav-link" href="c01-getting-data.html">Start reading</a>
+    <a class="af-gh" href="https://github.com/datafirst-aflearn/MICS6-Guide"
+       target="_blank" rel="noopener" aria-label="GitHub repository">
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.07-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path>
+      </svg>
+    </a>
+  </div>
+</nav>
+
+<header class="af-wrap af-hero">
+  <div>
+    <h1>Analysing MICS6 foundational learning data</h1>
+    <p>A practical, reproducible route from the raw UNICEF and IPUMS MICS6 downloads
+    to survey-weighted estimates of foundational reading and numeracy — with the
+    AFLEARN scripts, harmonisation rules and technical documentation that make the
+    results defensible.</p>
+  </div>
+  <div class="af-lockup">
+    <img src="files/AFLEARN-datahub-lockup.png"
+         onerror="this.onerror=null;this.src='files/AFLEARN-datahub-lockup.svg'"
+         alt="AFLEARN DataHub">
+  </div>
+</header>
+
+<main class="af-wrap">
+  <p class="af-section-label">Seven sections</p>
+  <div class="af-grid">
+
+    <a class="af-card" href="c01-getting-data.html">
+      <img class="af-card-icon" src="files/icons/ahead-bars.svg" alt="">
+      <h3>1. Getting MICS6 data</h3>
+      <span class="af-chip">Guide</span>
+      <p>Choose between UNICEF and IPUMS MICS, register, and download the surveys
+      you need — including when the IPUMS reading variables are unsafe.</p>
+    </a>
+
+    <a class="af-card" href="c02-whats-in-data.html">
+      <img class="af-card-icon" src="files/icons/ahead-book.svg" alt="">
+      <h3>2. What's in MICS6 data?</h3>
+      <span class="af-chip">Concept</span>
+      <p>Files, units of observation and identifiers; who is in the <code>fs</code>
+      sample; and how the reading and numeracy assessments are built.</p>
+    </a>
+
+    <a class="af-card" href="c03-organise.html">
+      <img class="af-card-icon" src="files/icons/ahead-layers.svg" alt="">
+      <h3>3. Preparing UNICEF data</h3>
+      <span class="af-chip">Guide</span>
+      <p>Organise the download, merge files within a country, harmonise variables
+      across countries, and construct research-ready reading outcomes.</p>
+    </a>
+
+    <a class="af-card" href="c04-ipums-reading.html">
+      <img class="af-card-icon" src="files/icons/ahead-doc.svg" alt="">
+      <h3>4. Preparing IPUMS data</h3>
+      <span class="af-chip">Guide</span>
+      <p>Merge AFLEARN's corrected reading variables onto an IPUMS MICS child
+      extract so multi-passage surveys are represented in full.</p>
+    </a>
+
+    <a class="af-card" href="c05-survey-design.html">
+      <img class="af-card-icon" src="files/icons/ahead-board.svg" alt="">
+      <h3>5. Survey design and weights</h3>
+      <span class="af-chip">Concept</span>
+      <p>Which MICS weight to use, how to set the design for one survey or a pool
+      of surveys, and how to get standard errors right.</p>
+    </a>
+
+    <a class="af-card" href="c06-worked-examples.html">
+      <img class="af-card-icon" src="files/icons/ahead-r.svg" alt="">
+      <h3>6. Worked examples</h3>
+      <span class="af-chip">Analysis</span>
+      <p>Nine end-to-end analyses in R and Stata: who is assessed, distributions
+      versus indicators, wealth gaps, schooling status and grade trajectories.</p>
+    </a>
+
+    <a class="af-card" href="c07-technical.html">
+      <img class="af-card-icon" src="files/icons/ahead-code.svg" alt="">
+      <h3>7. Technical documentation</h3>
+      <span class="af-chip">Concept</span>
+      <p>Harmonisation methods, reading construction rules, country-specific
+      issues, crosswalks and the validation checks behind the scripts.</p>
+    </a>
+
+  </div>
+
+  <div class="af-foot">
+    AFLEARN DataHub &middot; MICS6 Analysis Guide &middot;
+    <a href="https://github.com/datafirst-aflearn/MICS6-Guide" target="_blank" rel="noopener">Source and scripts on GitHub</a>
+  </div>
+</main>
+
+<script>
+(function () {
+  var destinations = [
+    { t: "Getting MICS6 data", s: "Section 1", u: "c01-getting-data.html" },
+    { t: "Getting data from UNICEF MICS", s: "Section 1", u: "c01-unicef.html" },
+    { t: "Getting data from IPUMS MICS", s: "Section 1", u: "c01-ipums.html" },
+
+    { t: "What's in MICS6 data?", s: "Section 2", u: "c02-whats-in-data.html" },
+    { t: "Files, units of observation and identifiers", s: "Section 2", u: "c02-files.html" },
+    { t: "Who is in the fs sample?", s: "Section 2", u: "c02-fs-sample.html" },
+    { t: "Foundational learning skills", s: "Section 2", u: "c02-fls.html" },
+    { t: "Understanding the reading assessment", s: "Section 2", u: "c02-reading.html" },
+    { t: "Understanding the numeracy assessment", s: "Section 2", u: "c02-numeracy.html" },
+
+    { t: "Organising the UNICEF download", s: "Section 3", u: "c03-organise.html" },
+    { t: "Merging MICS6 files within a country", s: "Section 3", u: "c03-merge.html" },
+    { t: "Harmonising variables across countries", s: "Section 3", u: "c03-harmonise.html" },
+    { t: "Constructing research-ready reading variables", s: "Section 3", u: "c03-reading.html" },
+
+    { t: "Adding the correct reading data to an IPUMS extract", s: "Section 4", u: "c04-ipums-reading.html" },
+
+    { t: "Survey design, weights and standard errors", s: "Section 5", u: "c05-survey-design.html" },
+    { t: "Which MICS weight should I use?", s: "Section 5", u: "c05-weights.html" },
+    { t: "Analysing a single survey", s: "Section 5", u: "c05-single-survey.html" },
+    { t: "Combining MICS6 surveys", s: "Section 5", u: "c05-pooling.html" },
+    { t: "Standard errors and confidence intervals", s: "Section 5", u: "c05-standard-errors.html" },
+    { t: "Survey design checklist", s: "Section 5", u: "c05-checklist.html" },
+
+    { t: "Worked examples", s: "Section 6", u: "c06-worked-examples.html" },
+    { t: "Prepare the analysis data", s: "Section 6", u: "c06-prepare-analysis.html" },
+    { t: "Who is assessed?", s: "Section 6", u: "c06-who-assessed.html" },
+    { t: "Indicators versus distributions", s: "Section 6", u: "c06-numeracy-distributions.html" },
+    { t: "Missing reading outcomes", s: "Section 6", u: "c06-reading-status.html" },
+    { t: "Reading language and coverage", s: "Section 6", u: "c06-reading-language.html" },
+    { t: "Learning inequalities by wealth", s: "Section 6", u: "c06-wealth.html" },
+    { t: "In-school and out-of-school children", s: "Section 6", u: "c06-schooling-status.html" },
+    { t: "Learning by grade and age", s: "Section 6", u: "c06-grade-trajectories.html" },
+    { t: "Timing within the school year", s: "Section 6", u: "c06-school-timing.html" },
+
+    { t: "Technical documentation", s: "Section 7", u: "c07-technical.html" },
+    { t: "FS harmonisation methods", s: "Section 7", u: "c07-fs-harmonisation.html" },
+    { t: "Reading-variable construction", s: "Section 7", u: "c07-reading-construction.html" },
+    { t: "Country-specific issues", s: "Section 7", u: "c07-country-issues.html" },
+    { t: "Variable crosswalks and dictionaries", s: "Section 7", u: "c07-crosswalks.html" },
+    { t: "Why current_grade is not the child's grade", s: "Section 7", u: "c07-current-grade.html" },
+    { t: "Validation and reproducibility", s: "Section 7", u: "c07-validation.html" }
+  ];
+
+  var input = document.getElementById("af-q");
+  var box = document.getElementById("af-results");
+  if (!input || !box) return;
+
+  var matches = [];
+  var cursor = -1;
+
+  function render(list) {
+    matches = list;
+    cursor = list.length ? 0 : -1;
+    if (!list.length) {
+      box.innerHTML = '<div class="af-empty">No matching page</div>';
+      box.classList.add("open");
+      return;
+    }
+    box.innerHTML = list.map(function (d, i) {
+      return '<a href="' + d.u + '"' + (i === 0 ? ' class="active"' : '') + '>' +
+        d.t + '<small>' + d.s + '</small></a>';
+    }).join("");
+    box.classList.add("open");
+  }
+
+  function close() {
+    box.classList.remove("open");
+    cursor = -1;
+  }
+
+  function highlight() {
+    var links = box.querySelectorAll("a");
+    for (var i = 0; i < links.length; i++) {
+      links[i].classList.toggle("active", i === cursor);
+    }
+    if (cursor >= 0 && links[cursor]) {
+      links[cursor].scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  input.addEventListener("input", function () {
+    var q = input.value.trim().toLowerCase();
+    if (!q) { close(); return; }
+    render(destinations.filter(function (d) {
+      return (d.t + " " + d.s).toLowerCase().indexOf(q) !== -1;
+    }).slice(0, 12));
+  });
+
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { close(); input.blur(); return; }
+    if (!box.classList.contains("open")) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      cursor = Math.min(cursor + 1, matches.length - 1);
+      highlight();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      cursor = Math.max(cursor - 1, 0);
+      highlight();
+    } else if (e.key === "Enter" && cursor >= 0 && matches[cursor]) {
+      e.preventDefault();
+      window.location.href = matches[cursor].u;
+    }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
+      e.preventDefault();
+      input.focus();
+      input.select();
+    }
+  });
+
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest(".af-search")) close();
+  });
+})();
+</script>
+```

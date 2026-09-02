@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 191" width="280" height="191" font-family="Inter, Segoe UI, sans-serif">
+  <g transform="translate(104 14)">
+    <rect width="72" height="72" rx="16" fill="#0d0d52"/>
+    <path d="M20 50 36 22l16 28" fill="none" stroke="#0dd8f9" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M27 41h18" fill="none" stroke="#ffad44" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <text x="140" y="128" text-anchor="middle" fill="#0d0d52" font-size="34" font-weight="700" letter-spacing="2">AFLEARN</text>
+  <text x="140" y="158" text-anchor="middle" fill="#0049ff" font-size="22" font-weight="600" letter-spacing="6">DATAHUB</text>
+</svg>

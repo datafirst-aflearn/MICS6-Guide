@@ -1,0 +1,145 @@
+# Getting data from UNICEF MICS {#c01-unicef}
+
+UNICEF is the primary source for the original MICS microdata. For work on the **MICS6 Foundational Learning Skills (FLS) module**, the UNICEF files are particularly important because they retain the full country-specific questionnaire structure and reading-assessment variables.
+
+This page explains how to identify and download the MICS6 surveys you need. [Organising the UNICEF download](#c03-organise) then provides AFLEARN scripts to organise, merge and harmonise the downloaded files.
+
+## 1. Go to the UNICEF MICS survey portal
+
+Open the [UNICEF MICS surveys page](https://mics.unicef.org/surveys).
+
+The survey catalogue can be filtered by characteristics including country, survey round and survey status. For this guide, select **MICS6** as the survey round.
+
+::: {.alternativebox-header}
+**Why MICS6?**
+:::
+
+::: {.alternativebox}
+This guide deliberately focuses on MICS6 because this was the first MICS round to include the Foundational Learning Skills module. The module was administered through the Questionnaire for Children Age 5–17, with the learning assessment targeted to children aged 7–14. UNICEF's MICS6 statistical analysis manual describes the Questionnaire for Children Age 5–17 as applying to one randomly selected child aged 5–17 in each household.
+
+Source: [UNICEF, *MICS6 Manual for Statistical Data Analysis*](https://data.unicef.org/wp-content/uploads/2020/05/MICS6-manual-for-stats-data-analysis-English_2020.pdf).
+:::
+
+## 2. Register or log in
+
+MICS microdata are available for research use through the UNICEF MICS data-access system. You may be asked to log in or register before downloading microdata.
+
+Registration and use of MICS data are free. The same approved MICS user credentials are also used when obtaining data through IPUMS MICS. See the [IPUMS MICS Getting Started guidance](https://mics.ipums.org/mics/user_guide.shtml).
+
+## 3. Select the MICS6 surveys you need
+
+For each country, pay attention to the **survey year**, **round** and **geographic coverage**.
+
+A country may occasionally have more than one MICS dataset or a survey covering a subnational population. Do not assume that every entry labelled MICS6 represents the same geographic population.
+
+For multi-country analysis, we recommend recording at least:
+
+- country;
+- survey year;
+- MICS round;
+- geographic coverage;
+- UNICEF survey/sample name; and
+- the version of the downloaded dataset.
+
+Keeping this information with your analysis makes it much easier to reproduce the exact set of surveys used later.
+
+## 4. Download the microdata and documentation
+
+UNICEF MICS downloads contain several files for each survey rather than a single rectangular analysis dataset. The exact set depends on which questionnaires and modules were administered.
+
+The files are typically distributed in **SPSS (`.sav`) format** and carry variable labels and value labels. R can read `.sav` files directly using packages such as `haven`, and Stata can import them directly.
+
+A MICS6 country download commonly includes files such as:
+
+```text
+bh.sav   Birth history
+ch.sav   Children under five
+fs.sav   Selected child aged 5–17
+hh.sav   Household
+hl.sav   Household members / household listing
+mn.sav   Men
+wm.sav   Women
+```
+
+Not every survey contains every file. The exact structure depends on the questionnaires administered in that country.
+
+The file that contains the Foundational Learning Skills assessment is the **`fs` file**. However, many analyses require variables held elsewhere — for example, household characteristics from `hh` or information about household members from `hl`. This is why understanding the file structure and merging rules is important. We cover these in [Files, units of observation and identifiers](#c02-files).
+
+## Download the survey documentation too
+
+Do not download only the microdata. The country documentation is essential for interpreting the variables correctly.
+
+Where available, retain:
+
+- the survey report;
+- questionnaires;
+- interviewer instructions or enumeration materials;
+- sampling documentation;
+- dataset readme files; and
+- any country-specific notes supplied with the release.
+
+This is especially important for the FLS reading assessment because countries could adapt the language and wording of the reading materials. The generic MICS6 questionnaire documentation itself notes that countries may differ in the exact words, names and stories used in the reading passage. See the [IPUMS rendering of the standard MICS6 Questionnaire for Children Age 5–17](https://mics.ipums.org/mics-action/source_documents/survey_form_mics6_fs.xml).
+
+::: {.alternativebox-header}
+**For reading analyses, keep the country questionnaires and reading materials**
+:::
+
+::: {.alternativebox}
+You will need to know which reading passage a child attempted and how long that passage was in order to construct reading accuracy correctly. These details cannot always be recovered from the released analysis variables alone. AFLEARN has compiled the required assessment-language and passage-length information for the surveys supported by this guide. See [Constructing research-ready reading variables](#c03-reading).
+:::
+
+## 5. Messy nested survey archives
+
+If you download several surveys together, the resulting archive can contain multiple nested folders and zip files. The data are all there, but the folder structure is inconvenient for reproducible analysis.
+
+For example, after manually unzipping a bulk download you may encounter something like:
+
+```text
+MICS_Datasets.zip
+  └── country folder
+       └── another archive
+            └── another folder
+                 ├── fs.sav
+                 ├── hh.sav
+                 ├── hl.sav
+                 └── ...
+```
+
+There is no analytical reason to retain this nesting.
+
+AFLEARN provides an R script, [`prepare-mics-fs.R`](https://github.com/datafirst-aflearn/MICS6-Guide/blob/main/Script/prepare-mics-fs.R), that turns the bulk UNICEF download into a simple structure with one directory per survey:
+
+```text
+Data/UNICEF/
+├── BEN_2021_MICS6_v01_M/
+│   ├── bh.sav
+│   ├── ch.sav
+│   ├── fs.sav
+│   ├── hh.sav
+│   ├── hl.sav
+│   ├── wm.sav
+│   └── ...
+├── GHA_2017_MICS6_v01_M/
+│   └── ...
+└── ...
+```
+
+You do **not** need to reorganise these folders manually. The script and instructions are provided in [Organising the UNICEF download](#c03-organise).
+
+## When should I use the UNICEF files?
+
+The UNICEF route is the best choice when:
+
+- you need variables that have not been harmonised by IPUMS;
+- you want to understand or reproduce country-specific MICS measures;
+- you are working directly with item-level FLS data;
+- you need the complete foundational reading information; or
+- you want full control over how variables are harmonised across surveys.
+
+For many multi-country projects, a useful strategy is to use **IPUMS for harmonised background variables** and **UNICEF source files for foundational reading**. AFLEARN provides the tools to combine the two.
+
+## Next step
+
+Before processing the files, read [What's in MICS6 data?](#c02-whats-in-data). It explains why MICS data are split across files, what the different units of observation are, and how the `fs` file relates to the household and household-member files.
+
+If you are already familiar with the MICS file structure, continue directly to [Organising the UNICEF download](#c03-organise).

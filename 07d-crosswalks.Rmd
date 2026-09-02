@@ -1,0 +1,175 @@
+# Variable crosswalks and dictionaries {#c07-crosswalks}
+
+A harmonised variable should always be traceable back to its source.
+
+AFLEARN therefore treats the variable crosswalk as part of the data product, not as optional documentation.
+
+## FS crosswalk
+
+The FS processing script writes:
+
+```text
+mics6_fs_variable_crosswalk.xlsx
+```
+
+The current workbook contains four sheets:
+
+| Sheet | Contents |
+|---|---|
+| `crosswalk` | Harmonised variable, label, theme and per-survey source field |
+| `excluded` | Source variables intentionally omitted and the reason |
+| `level_map` | Raw education codes mapped to harmonised education levels |
+| `notes` | Country- and theme-specific caveats |
+
+## How to use the crosswalk
+
+Suppose you want to analyse:
+
+```text
+father_edu_h
+```
+
+Do not stop at the variable label.
+
+Use the crosswalk to answer:
+
+1. What source variable supplied father education in each survey?
+2. Was it read from `fs` or linked from `hl`?
+3. Which raw codes map to primary, lower secondary, upper secondary, etc.?
+4. Does a country have a special category or missing-data rule?
+5. Is coverage materially different in a particular survey?
+
+This is especially important for variables that required construction rather than simple renaming.
+
+## What should be in a good crosswalk row?
+
+At minimum:
+
+```text
+theme
+harmonised_name
+harmonised_label
+survey
+source_file
+source_variable
+transformation
+notes
+```
+
+The existing workbook already contains much of this information. As the revised guide develops, it would be useful to make `source_file` and `transformation` explicit wherever a variable is constructed from another file or recoded.
+
+## Reading crosswalk
+
+The reading script currently documents mappings primarily in code and in the existing technical guide.
+
+For long-term maintainability, AFLEARN should also provide a machine-readable reading crosswalk.
+
+A useful structure would be:
+
+```text
+country_iso3
+year
+harmonised_variable
+passage
+source_variable
+transformation
+notes
+```
+
+For example:
+
+```text
+MWI | 2019 | words_att | English  | FL20A  | rename | passage A
+MWI | 2019 | words_att | Chichewa | FLB20A | passage-specific processing | ...
+```
+
+This would make the multi-passage logic much easier to audit.
+
+## Variable dictionary
+
+Researchers also need a user-facing dictionary describing the **final** analysis variables.
+
+A useful dictionary should include:
+
+```text
+variable
+label
+type
+codes / units
+universe
+source
+harmonisation depth
+comparability warning
+```
+
+The distinction between **source** and **universe** is particularly important.
+
+For example:
+
+```text
+reading_accuracy
+```
+
+may exist for only the subset of children who reached a reading passage, even though the overall FS file covers ages 5–17.
+
+## Harmonisation depth
+
+One useful addition to the AFLEARN dictionary would be an explicit field such as:
+
+```text
+rename only
+recoded
+constructed
+linked from another file
+country-specific construction
+```
+
+This tells users how much processing sits behind a common variable name.
+
+For example:
+
+| Variable | Harmonisation depth |
+|---|---|
+| `age` | rename only |
+| `current_level_h` | country-specific recode |
+| `father_edu` | linked from `hl` |
+| `reading_accuracy` | constructed |
+| `reading_status` | multi-step country-aware construction |
+| `passage_language` | country-specific construction |
+
+## Excluded variables are documentation too
+
+The `excluded` sheet should remain.
+
+When a source field is deliberately omitted because:
+
+- it is country-specific;
+- it cannot be harmonised defensibly;
+- it duplicates another processed block; or
+- it falls outside the scope of the guide,
+
+recording that decision is preferable to silently dropping it.
+
+An excluded-variable register prevents future maintainers from repeatedly rediscovering why a field was left out.
+
+## Recommended downloadable documentation bundle
+
+The final guide would ideally distribute:
+
+```text
+mics6_fs_variable_crosswalk.xlsx
+mics6_reading_variable_crosswalk.csv
+mics6_variable_dictionary.csv
+country_notes.csv
+```
+
+alongside the processing scripts.
+
+That would give users four different views of the same system:
+
+```text
+script       = exact implementation
+crosswalk    = source → harmonised variable
+dictionary   = harmonised variable → researcher meaning
+country notes= exceptions and caveats
+```

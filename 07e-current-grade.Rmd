@@ -1,0 +1,219 @@
+# Why current_grade is not the child's grade {#c07-current-grade}
+
+`current_grade` looks like a grade variable, but it records the **year within the child's current education level**.
+
+That distinction is easy to miss.
+
+Consider:
+
+| `current_level_h` | `current_grade` | Meaning |
+|---|---:|---|
+| Primary | 1 | First year of primary |
+| Lower secondary | 1 | First year of lower secondary |
+| Upper secondary | 1 | First year of upper secondary |
+
+All three children have:
+
+```text
+current_grade = 1
+```
+
+but they are at very different points in the school system.
+
+The same issue applies to:
+
+```text
+highest_grade
+previous_grade
+```
+
+which should be interpreted with their corresponding education-level variables.
+
+## Why this happens
+
+The standard MICS schooling questions separately record:
+
+```text
+education level
++
+grade/year within that level
+```
+
+AFLEARN harmonises the level into:
+
+```text
+current_level_h
+```
+
+but deliberately leaves `current_grade` as the year reported within that level.
+
+This preserves the source information rather than imposing a single grade system on countries with different education structures.
+
+## The "sawtooth" problem
+
+If you pool currently enrolled children and graph only `current_grade`, you will see many children at:
+
+```text
+1, 2, 3
+```
+
+because primary, lower secondary and upper secondary cycles each restart.
+
+That distribution is not a simple Grade 1 → Grade 12 progression.
+
+Before using grade for trajectories, either:
+
+1. restrict the analysis to one education level; or
+2. construct a country-specific administrative grade.
+
+## Option 1: restrict to primary school
+
+For many foundational-learning analyses, the cleanest solution is:
+
+```{r eval=FALSE}
+primary <- d %>%
+  filter(
+    enrolled == 1,
+    current_level_h == 1
+  )
+```
+
+Within primary:
+
+```text
+current_grade = 1, 2, 3, ...
+```
+
+has a much clearer interpretation.
+
+This is the approach used in the basic grade-trajectory example in Section 6.
+
+## Option 2: construct an administrative grade
+
+Suppose a country has:
+
+```text
+6 years primary
+3 years lower secondary
+3 years upper secondary
+```
+
+Then:
+
+```{r eval=FALSE}
+d <- d %>%
+  mutate(
+    admin_grade = case_when(
+      current_level_h == 1 ~ current_grade,
+      current_level_h == 2 ~ 6 + current_grade,
+      current_level_h == 3 ~ 9 + current_grade,
+      TRUE ~ NA_real_
+    )
+  )
+```
+
+produces:
+
+```text
+Primary 1          admin_grade 1
+...
+Primary 6          admin_grade 6
+Lower secondary 1  admin_grade 7
+...
+Upper secondary 3  admin_grade 12
+```
+
+## Ghana example
+
+In the current MICS6 harmonised data, Ghana provides a clean example of a:
+
+```text
+6 + 3 + 3
+```
+
+structure.
+
+The administrative-grade transformation is therefore:
+
+```{r eval=FALSE}
+gha <- d %>%
+  filter(country_iso3 == "GHA") %>%
+  mutate(
+    admin_grade = case_when(
+      current_level_h == 1 ~ current_grade,
+      current_level_h == 2 ~ 6 + current_grade,
+      current_level_h == 3 ~ 9 + current_grade,
+      TRUE ~ NA_real_
+    )
+  )
+```
+
+## Do not use the same offsets in every country
+
+Primary-cycle length differs across countries.
+
+The current source data include examples of:
+
+```text
+5-year primary cycles
+6-year primary cycles
+7-year primary cycles
+8-year primary cycles
+```
+
+Some systems also code lower-secondary years differently or do not use a separate lower-secondary category in the same way.
+
+A correct administrative-grade variable therefore requires a **country-specific education-system lookup**.
+
+A useful future AFLEARN lookup would contain:
+
+```text
+country_iso3
+survey_year
+current_level_h
+grade_within_level
+admin_grade
+notes
+source
+```
+
+## Validate the constructed grade
+
+After constructing `admin_grade`, check:
+
+1. plausible ages by grade;
+2. weighted enrolment distribution;
+3. maximum grade against the education structure;
+4. transitions between education levels; and
+5. country documentation.
+
+For example:
+
+```{r eval=FALSE}
+des %>%
+  filter(enrolled == 1) %>%
+  group_by(country_iso3, admin_grade) %>%
+  summarise(
+    mean_age = survey_mean(
+      age,
+      na.rm = TRUE
+    )
+  )
+```
+
+A wildly non-monotonic age-by-grade profile is a sign that the grade construction needs review.
+
+## Grade is still not schooling exposure
+
+Even a correctly constructed administrative grade does not capture:
+
+- repetition;
+- late school entry;
+- interrupted schooling;
+- attendance;
+- time through the current school year; or
+- instructional time.
+
+For cross-country learning trajectories, Section 6 therefore also introduces `gradeprogress`, which adjusts grade approximately for the timing of the MICS interview within the school year.
+
+That variable answers a different problem and requires its own documented assumptions.

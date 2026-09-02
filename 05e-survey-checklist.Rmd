@@ -1,0 +1,64 @@
+# Survey-design checklist {#c05-checklist}
+
+Before reporting a MICS6 estimate, check the following.
+
+## Analysis population
+
+- [ ] I know what one row in my analysis dataset represents.
+- [ ] For FLS analysis, my observations are selected children from `fs`.
+- [ ] If I merged variables from `hh` or `hl`, I have not changed the weight merely because the covariate came from another file.
+
+## Weight
+
+- [ ] I am using `fsweight` for selected-child/FLS analysis.
+- [ ] I am not using `fshweight` as a substitute for the selected-child weight.
+- [ ] I understand that normalised survey weights are not automatically population-expansion weights for estimating national counts.
+
+## Survey design
+
+- [ ] I have specified the PSU.
+- [ ] I have specified the sampling stratum.
+- [ ] I have specified the weight.
+- [ ] My standard errors come from survey-aware estimation.
+
+For standard MICS6 `fs` data, this will usually be:
+
+```text
+weight   = fsweight
+PSU      = PSU
+stratum  = stratum
+```
+
+## Subpopulations
+
+- [ ] I defined the survey design before restricting to my analytical subpopulation.
+- [ ] In R, I subset/filter the survey design object.
+- [ ] In Stata, I use `subpop()` where appropriate.
+- [ ] I checked whether small domains leave too few PSUs for precise estimation.
+
+## Multiple surveys
+
+If I appended countries or survey years:
+
+- [ ] I created a survey identifier.
+- [ ] PSU identifiers are unique across surveys.
+- [ ] stratum identifiers are unique across surveys.
+- [ ] I have not interpreted a simple pooled `fsweight` estimate as a population-weighted regional statistic without defining the estimand.
+- [ ] If I report an average across countries, I state how countries were weighted.
+
+## Reading
+
+- [ ] I checked `reading_status` before defining my reading analysis sample.
+- [ ] For multi-passage countries, I use the AFLEARN reading data rather than incomplete IPUMS reading variables.
+
+## Reporting
+
+- [ ] I report confidence intervals or standard errors with the point estimates.
+- [ ] I retain the unweighted analytic N.
+- [ ] For very small subgroups, I check the number of contributing PSUs and the width of the confidence interval.
+
+::: {.alternativebox-solo}
+**If these boxes are checked, the analysis is much less likely to produce a precise-looking but incorrectly estimated MICS result.**
+:::
+
+The worked examples in Section 6 apply these principles in R and Stata.

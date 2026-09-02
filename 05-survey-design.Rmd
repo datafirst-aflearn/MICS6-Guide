@@ -1,0 +1,77 @@
+# Survey design, weights and standard errors {#c05-survey-design}
+
+MICS is a **complex sample survey**. To produce correct population estimates and standard errors, an analysis needs to account for the survey design.
+
+For the MICS6 selected-child (`fs`) data, three pieces of information are central:
+
+```text
+fsweight   sampling weight for the selected child
+PSU        primary sampling unit
+stratum    sampling stratum
+```
+
+The standard MICS6 files include these variables in the `fs` dataset. IPUMS also harmonises the corresponding survey-design variables. See the [IPUMS MICS variable-name crosswalk](https://mics.ipums.org/mics/resources/training_exercises/2024_12_var_names_ipums_unicef.pdf).
+
+::: {.alternativebox-header}
+**The basic rule**
+:::
+
+::: {.alternativebox}
+For analysis of children in the `fs` file, do not calculate a weighted mean and then use an ordinary standard error. Tell the software about the **weight, clustering and stratification together**.
+:::
+
+This section explains:
+
+- what the selected-child weight represents;
+- why clustering and stratification matter;
+- how to set up a MICS6 survey design in R and Stata;
+- how to estimate subpopulations correctly; and
+- what changes when several countries/surveys are combined.
+
+## Why ordinary standard errors are wrong
+
+MICS does not draw children independently from a simple random sample.
+
+Households are selected through a stratified, clustered sample design. Children living in the same sampled cluster can be more similar to one another than children selected independently from across the country.
+
+If the analysis ignores that structure, the estimated **standard errors, confidence intervals and p-values can be wrong**.
+
+Weights solve a different problem. They account for unequal selection probabilities and survey adjustments. They do not, by themselves, tell the software how observations are clustered or stratified.
+
+A correct design-based analysis therefore needs:
+
+```text
+WEIGHT
+  +
+PSU / CLUSTER
+  +
+STRATUM
+```
+
+## The three design variables
+
+### `fsweight`
+
+`fsweight` is the sample weight for the randomly selected child aged 5–17.
+
+Use it when the unit of analysis is the selected child — including analyses of foundational reading and numeracy among children aged 7–14.
+
+### `PSU`
+
+`PSU` identifies the **primary sampling unit** used for sampling-error estimation.
+
+In most MICS applications this corresponds to the sampled cluster/enumeration area.
+
+Do not assume that the household identifier is the PSU.
+
+### `stratum`
+
+`stratum` identifies the sampling stratum used for variance estimation.
+
+Stratification is part of the sample design and should be incorporated when estimating standard errors.
+
+The exact design variables should always be checked in the country dataset and survey documentation. Some surveys contain additional working design variables, but standard MICS6 releases generally provide `PSU` and `stratum`.
+
+## Next
+
+The next page explains the two MICS6 weights found in the `fs` file and why `fsweight` is normally the correct choice for foundational-learning analysis: [Which MICS weight should I use?](#c05-weights).

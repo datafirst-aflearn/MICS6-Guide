@@ -1,0 +1,132 @@
+# Understanding the MICS6 numeracy assessment {#c02-numeracy}
+
+The MICS6 foundational numeracy assessment consists of **21 items organised into four tasks**.
+
+Unlike reading, the numeracy assessment does not involve language-specific passages of different lengths. This makes the data considerably simpler to prepare for multi-country analysis, although researchers should still examine country questionnaires and routing.
+
+UNICEF describes the four domains as number reading, number discrimination, addition, and pattern recognition.
+
+## Structure of the assessment
+
+| Task | Number of items | What the child does |
+|---|---:|---|
+| Number reading | 6 | Reads numbers shown by the interviewer |
+| Number discrimination | 5 | Identifies the larger of two numbers |
+| Addition | 5 | Solves addition problems |
+| Pattern recognition and completion | 5 | Identifies the missing number in a sequence |
+| **Total** | **21** | |
+
+The standard MICS6 booklet moves from relatively simple items to more demanding ones within the assessment.
+
+## 1. Number reading
+
+The child is shown **six numbers** and asked to identify each one.
+
+The standard assessment includes numbers ranging from one to three digits.
+
+The official MICS task indicator requires the child to answer **all six items correctly**.
+
+## 2. Number discrimination
+
+The child is shown **five pairs of numbers** and asked to identify which number in each pair is larger.
+
+The official task indicator requires **all five items correct**.
+
+## 3. Addition
+
+The child is given **five addition problems**.
+
+These include simple single-digit calculations and more demanding items.
+
+Again, successful completion of the MICS addition task requires **all five items correct**.
+
+## 4. Pattern recognition and completion
+
+The child is shown **five number sequences** with a missing value and asked to supply the missing number.
+
+The official task indicator requires **all five items correct**.
+
+## Foundational numeracy requires mastery of all four tasks
+
+The official MICS6 definition is deliberately stringent:
+
+```text
+6/6 number-reading items
+          AND
+5/5 number-discrimination items
+          AND
+5/5 addition items
+          AND
+5/5 pattern items
+          │
+          ▼
+FOUNDATIONAL NUMERACY SKILLS
+```
+
+UNICEF's standard tabulation plan specifies that a child must correctly complete every item within each task and all four tasks to demonstrate foundational numeracy skills.
+
+See the [UNICEF FLS module adaptation guidelines](https://data.unicef.org/wp-content/uploads/2019/09/FL-module-adaptation-guidelines-August-21-2019.pdf).
+
+## The binary indicator hides a lot of information
+
+Because the official measure requires success on every task, children with very different skill profiles can receive the same value.
+
+For example:
+
+```text
+                    Number   Discrim.   Addition   Pattern    Total
+Child A               6/6      5/5        5/5       4/5      20/21
+Child B               3/6      1/5        0/5       0/5       4/21
+
+Foundational
+numeracy?              NO       —          —         —          NO
+```
+
+Both are classified as not demonstrating foundational numeracy skills, but their observed performance is clearly very different.
+
+For research purposes, it is often informative to examine:
+
+- each of the four task indicators;
+- the individual items;
+- number of items correct within each task;
+- total items correct out of 21; and
+- the overall foundational-numeracy indicator.
+
+Which measure is appropriate depends on the research question.
+
+## Stop rules and non-attempts
+
+The standard questionnaire includes interviewer instructions and stop rules within parts of the numeracy assessment. Item responses can therefore distinguish correct, incorrect and no-attempt outcomes.
+
+When constructing scores, researchers should not automatically treat every blank or non-attempt as equivalent without checking the questionnaire routing.
+
+The worked examples later in this guide show how AFLEARN constructs transparent numeracy scores from the item-level data.
+
+## Comparing numeracy across countries
+
+Numeracy avoids some of the language-specific complications of reading, but comparison still requires care.
+
+In particular, researchers should consider:
+
+- age;
+- grade;
+- whether the child is currently attending school;
+- exposure to schooling within the current year;
+- survey timing; and
+- differences in schooling systems.
+
+A Grade 3 child assessed near the beginning of a school year has had less exposure to Grade 3 instruction than a Grade 3 child assessed near the end of the year. This matters when interpreting apparent cross-country differences.
+
+## Headline indicators and distributions answer different questions
+
+The MICS foundational-numeracy indicator answers:
+
+> What proportion of children demonstrate mastery of all four specified foundational numeracy tasks?
+
+A total score answers a different question:
+
+> How many of the 21 observed numeracy items can children answer correctly?
+
+Neither is universally preferable. The important point is to choose the measure that matches the research question and describe it accurately.
+
+The worked examples in Section 6 use both approaches.

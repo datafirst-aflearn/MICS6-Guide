@@ -1,0 +1,296 @@
+# FS harmonisation methods {#c07-fs-harmonisation}
+
+The FS harmonisation creates one child-level multi-country dataset from the original UNICEF MICS6 `fs.sav` files.
+
+The current script is:
+
+```text
+harmonize-mics-fs-v1.0.R
+```
+
+## Pipeline
+
+For each supported survey, the script:
+
+```text
+identify survey from folder
+          ↓
+read fs.sav
+          ↓
+read hl.sav where required
+          ↓
+harmonise each thematic block
+          ↓
+apply country-specific mappings
+          ↓
+retain identifiers and merge keys
+          ↓
+append surveys
+          ↓
+apply labels
+          ↓
+write R, Stata and Excel outputs
+```
+
+The current thematic blocks are:
+
+| Theme | Contents |
+|---|---|
+| HH | geography and household size |
+| WT | selected-child weights |
+| INT | FS interview date/time |
+| BG | parent education and school type |
+| CB | schooling background |
+| CL | child labour |
+| PR | parental involvement |
+| FCF | child functioning |
+| FCD | child discipline |
+| FL | FLS setup and numeracy items |
+
+Reading item batteries are intentionally excluded and handled by the separate reading script.
+
+## Identifiers
+
+Within each survey, the FS child is identified by:
+
+```text
+HH1 + HH2 + LN
+```
+
+The script also creates:
+
+```text
+cluster = HH1
+hhno    = HH2
+linech  = LN
+```
+
+to facilitate links to IPUMS and to the separate reading file.
+
+Before appending a survey, the processing should verify that:
+
+```text
+HH1 + HH2 + LN
+```
+
+uniquely identifies each selected-child record.
+
+## Geography
+
+The harmonised fields include:
+
+| Harmonised | Standard source | Meaning |
+|---|---|---|
+| `urban` | `HH6` | Urban/rural |
+| `region` | `HH7` | First administrative region |
+| `n_children_5_17` | `HH52` | Children aged 5–17 in household |
+
+`region` retains **country-specific codes**. A value of `1` in two countries does not imply the same type of region.
+
+Do not pool `region` codes without building a separate cross-country geographic classification.
+
+## Survey-design variables
+
+The current script retains:
+
+```text
+fsweight
+fshweight
+```
+
+Before the revised guide is published, it should also retain:
+
+```text
+PSU
+stratum
+```
+
+because these are needed for the survey-design workflow in Sections 5 and 6.
+
+No transformation is required: these should be preserved from the source data and documented in the crosswalk.
+
+## Interview timing
+
+The harmonised FS file retains:
+
+```text
+interview_day
+interview_month
+interview_year
+interview_start_hour
+interview_start_min
+interview_end_hour
+interview_end_min
+```
+
+These are renamed from the standard FS interview fields.
+
+AFLEARN does not currently create a single derived interview date or interview duration.
+
+The `interview_month` variable is used in the advanced Section 6 example on timing within the school year.
+
+## Parent education
+
+Mother and father education illustrate why some harmonisation requires more than renaming.
+
+The raw country-specific variables are retained:
+
+```text
+mother_edu
+father_edu
+```
+
+and common broad education levels are added:
+
+```text
+mother_edu_h
+father_edu_h
+```
+
+The harmonised level codes are:
+
+| Code | Meaning |
+|---:|---|
+| 0 | Early childhood / pre-primary |
+| 1 | Primary |
+| 2 | Lower secondary |
+| 3 | Upper secondary |
+| 4 | Vocational / technical |
+| 5 | Higher / tertiary |
+| 8 | Don't know |
+| 9 | No response / other special |
+
+The country-specific mappings are stored in the processing script and written to the `level_map` sheet of the Excel crosswalk.
+
+### Father's education
+
+Father education is not consistently available directly in `fs.sav`.
+
+The script uses the household-list file (`hl.sav`) and links the relevant household member onto the selected child's row.
+
+This is a good example of why the output should be treated as a constructed research dataset rather than a simple renamed copy of `fs.sav`.
+
+## School type
+
+`school_type` is retained using the country source coding.
+
+It is **not fully harmonised across countries**.
+
+For example, some surveys use a standard public/religious/private/community classification, while others use a different institutional taxonomy.
+
+Use the country notes before pooling this variable.
+
+## Child schooling
+
+The main harmonised variables are:
+
+```text
+ever_attended
+
+highest_level
+highest_grade
+highest_completed
+
+enrolled
+current_level
+current_grade
+
+attended_previous
+previous_level
+previous_grade
+```
+
+The raw level variables retain country coding.
+
+AFLEARN additionally constructs:
+
+```text
+highest_level_h
+current_level_h
+previous_level_h
+```
+
+using the common broad education-level classification above.
+
+### Grade is deliberately not fully harmonised
+
+`current_grade` remains the year **within the education level**.
+
+For example:
+
+```text
+current_level_h = primary
+current_grade   = 1
+```
+
+and:
+
+```text
+current_level_h = lower secondary
+current_grade   = 1
+```
+
+both occur.
+
+These are different years in the education system.
+
+See [Why current_grade is not the child's grade](#c07-current-grade).
+
+## Child labour, parental involvement, functioning and discipline
+
+For these themes the current harmonisation is intentionally conservative.
+
+It generally:
+
+```text
+renames common items
+retains original response coding
+applies common labels where justified
+does not manufacture derived indicators
+```
+
+The script therefore does **not** automatically construct:
+
+- child-labour prevalence;
+- violent-discipline indicators;
+- Washington Group functional-difficulty composites; or
+- other higher-level policy indicators.
+
+Researchers who need those measures should derive them transparently from the harmonised items and the relevant indicator definitions.
+
+## Numeracy
+
+The FS harmonisation retains:
+
+```text
+number_id_*
+number_compare_*
+number_add_*
+number_pattern_*
+```
+
+together with FLS setup variables such as:
+
+```text
+fl_consent
+child_consent
+lang_home
+lang_school
+fl_child_result
+```
+
+It does not currently derive a foundational-numeracy indicator.
+
+Section 6 provides a provisional total-score workflow, but any official binary indicator should be validated against published MICS tabulations before being added to the harmonised product.
+
+## What the FS harmonisation deliberately does not do
+
+A common variable name should not imply more comparability than the source data support.
+
+The script therefore avoids:
+
+- recoding `region` into a false cross-country taxonomy;
+- treating raw school-type codes as universally identical;
+- converting grade-within-level directly into years of schooling;
+- deriving complex policy indicators without an explicit validation step; and
+- duplicating reading variables already processed in the reading file.

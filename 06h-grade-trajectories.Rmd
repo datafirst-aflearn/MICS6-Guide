@@ -1,0 +1,174 @@
+# Worked example 7: Learning by grade and age {#c06-grade-trajectories}
+
+## Research question
+
+> How does learning change across grades, and how should we interpret differences when children of different ages occupy the same grade?
+
+Grade trajectories are intuitive, but MICS requires more care than a school-based grade assessment.
+
+## First: construct a meaningful grade variable
+
+The AFLEARN harmonised variable:
+
+```text
+current_grade
+```
+
+is the year **within the education level**.
+
+It cannot be treated as a universal grade number without `current_level_h`.
+
+For primary school:
+
+```{r eval=FALSE}
+d_primary <- d %>%
+  filter(
+    enrolled == 1,
+    current_level_h == 1
+  )
+```
+
+Within this restricted group, `current_grade` can be interpreted as primary year/grade.
+
+If you want a single grade scale spanning primary and secondary, construct it from the country's education system rather than simply using `current_grade`.
+
+See [Why current_grade is not the child's grade](#c07-current-grade).
+
+## Mean numeracy by primary grade
+
+### R
+
+```{r eval=FALSE}
+des %>%
+  filter(
+    age >= 7,
+    age <= 14,
+    enrolled == 1,
+    current_level_h == 1,
+    current_grade >= 1,
+    current_grade <= 6
+  ) %>%
+  group_by(
+    country_iso3,
+    current_grade
+  ) %>%
+  summarise(
+    mean_num = survey_mean(
+      numeracy_total,
+      vartype = "ci",
+      na.rm = TRUE
+    )
+  )
+```
+
+### Stata
+
+```stata
+gen primary = current_level_h == 1
+
+svy, subpop(if inrange(age,7,14) & enrolled==1 & ///
+    primary & inrange(current_grade,1,6)): ///
+    mean numeracy_total, ///
+    over(country_iso3 current_grade)
+```
+
+## Now examine age within grade
+
+### R
+
+```{r eval=FALSE}
+des %>%
+  filter(
+    enrolled == 1,
+    current_level_h == 1
+  ) %>%
+  group_by(
+    country_iso3,
+    current_grade
+  ) %>%
+  summarise(
+    mean_age = survey_mean(
+      age,
+      vartype = "ci",
+      na.rm = TRUE
+    )
+  )
+```
+
+A country with an average age of 10.5 in Grade 3 is not compositionally identical to one with an average age of 8.5 in Grade 3.
+
+Late entry, repetition and interruptions to schooling all affect the relationship between age and grade.
+
+## Age and grade are jointly informative
+
+A useful model is:
+
+```{r eval=FALSE}
+model <- svyglm(
+  numeracy_total ~ factor(current_grade) + age,
+  design = subset(
+    des,
+    enrolled == 1 &
+      current_level_h == 1 &
+      age >= 7 &
+      age <= 14
+  )
+)
+
+summary(model)
+```
+
+This describes grade differences after accounting linearly for age.
+
+Again, it is descriptive rather than causal.
+
+## Suggested figure
+
+For each country:
+
+```text
+x-axis: primary grade
+y-axis: mean numeracy score
+line: country
+```
+
+and accompany it with a second figure/table showing mean age by grade.
+
+This prevents the trajectory graph from being interpreted as if every country's Grade 3 population had the same age composition.
+
+## Cross-country trajectory tests
+
+If the research question is whether the **shape** of the grade trajectory differs across countries, use a regression with country-by-grade interactions rather than eyeballing the plot.
+
+For a flexible quadratic trajectory:
+
+```{r eval=FALSE}
+model <- svyglm(
+  numeracy_total ~
+    factor(country_iso3) *
+    (current_grade + I(current_grade^2)),
+  design = subset(
+    des,
+    enrolled == 1 &
+      current_level_h == 1 &
+      current_grade >= 1 &
+      current_grade <= 6
+  )
+)
+```
+
+Jointly test the country-by-grade interaction terms.
+
+In Stata:
+
+```stata
+svy: regress numeracy_total ///
+    i.country_iso3##c.current_grade##c.current_grade ///
+    if enrolled==1 & current_level_h==1 & ///
+       inrange(current_grade,1,6)
+
+testparm i.country_iso3#c.current_grade ///
+         i.country_iso3#c.current_grade#c.current_grade
+```
+
+The interaction test asks whether the trajectories differ across countries, not merely whether average performance levels differ.

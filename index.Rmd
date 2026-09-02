@@ -1,0 +1,22 @@
+---
+site: bookdown::bookdown_site
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  cache = FALSE
+)
+
+# Absolute project root, so chapters can build paths independently of the
+# working directory knitr happens to use.
+options(mics6.guide.root = normalizePath(".", winslash = "/", mustWork = FALSE))
+
+# Stata engine. Chapters show Stata code with eval=FALSE by default, so a
+# local Stata installation is not required to build the book.
+if (requireNamespace("Statamarkdown", quietly = TRUE)) {
+  library(Statamarkdown)
+}
+```

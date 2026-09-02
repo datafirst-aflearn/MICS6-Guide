@@ -1,0 +1,69 @@
+# Getting MICS6 data {#c01-getting-data}
+
+This guide focuses on **Round 6 of UNICEF's Multiple Indicator Cluster Surveys (MICS6)**, the round in which the Foundational Learning Skills (FLS) module was introduced.
+
+There are two main ways to obtain MICS6 data for the analyses covered in this guide:
+
+1. **UNICEF MICS** — download the original country datasets released by UNICEF; or
+2. **IPUMS MICS** — create a customised, harmonised multi-country extract using the IPUMS MICS data system.
+
+Both routes are useful. Which one you should use depends on your research question and, especially, whether you need the foundational **reading** data. Two practical constraints also matter: building an IPUMS MICS extract currently requires a **Stata licence**, and if you are analysing a **single country** the harmonisation that IPUMS provides adds little.
+
+## Which source should I use?
+
+| | UNICEF MICS | IPUMS MICS |
+|---|---|---|
+| **What you receive** | Original country survey files | A customised extract with harmonised variables across selected surveys |
+| **Best for** | Full access to country-specific variables; working directly with the FLS assessment; reproducing or extending MICS indicators | Multi-country analysis using harmonised demographic, household, schooling and other background variables |
+| **Preparation required** | More: files must be organised, merged and harmonised for multi-country work | Less: IPUMS provides harmonisation syntax and combines selected samples and variables |
+| **Software required** | Any: the `.sav` files open directly in R or Stata | Strictly Stata to build the extract, because IPUMS supplies the harmonisation as `.do` syntax. The resulting `.dta` can then be analysed in either R or Stata |
+| **Single-country analysis** | Recommended | Adds little: the benefit of IPUMS is cross-survey harmonisation |
+| **Foundational numeracy** | Recommended | Can be used |
+| **Foundational reading** | **Recommended** | **Do not use the IPUMS reading variables in MICS6 surveys with multiple reading passages. IPUMS retains only one passage, so children assessed on other passages are missing from the harmonised reading variables.** See [Adding the correct reading data to an IPUMS extract](#c04-ipums-reading) for the AFLEARN solution. |
+
+::: {.warningbox-header}
+**AFLEARN recommendation**
+:::
+
+::: {.warningbox}
+If your analysis uses foundational reading outcomes, **do not use the IPUMS reading variables for countries that administered more than one reading passage**. IPUMS retains only one passage, which can exclude a large share of children who actually completed the reading assessment. AFLEARN provides a research-ready reading file constructed from the complete UNICEF source data that can be merged onto an IPUMS MICS extract. This allows you to combine the convenience of IPUMS harmonisation with complete reading data.
+:::
+
+## Why are there two routes?
+
+UNICEF releases the MICS microdata in their original survey-file structure. A MICS survey contains several data files because different questionnaires have different units of observation — for example, households, household members, women, children under five and a randomly selected child aged 5–17. We explain this structure in [What's in MICS6 data?](#c02-whats-in-data).
+
+[IPUMS MICS](https://mics.ipums.org/mics/) is a collaboration that makes MICS data easier to use across countries and survey rounds. Researchers select a unit of analysis, surveys and variables, and IPUMS provides the source data together with harmonisation syntax to create a customised extract. IPUMS is particularly useful for multi-country research because it standardises variable names, coding and documentation across surveys. See the [IPUMS MICS Getting Started guide](https://mics.ipums.org/mics/user_guide.shtml).
+
+The two approaches are therefore complementary rather than competing.
+
+## What this guide adds
+
+Neither route by itself produces the exact research-ready dataset needed for many analyses of MICS6 foundational learning. AFLEARN therefore provides additional tools for both routes.
+
+### If you start with UNICEF MICS
+
+The guide provides resources to:
+
+- turn UNICEF's nested download folders into a clean directory structure;
+- merge the separate files within each country correctly;
+- harmonise commonly used variables across MICS6 countries; and
+- construct transparent reading variables that account for assessment language, passage length and the complex FLS reading skip patterns.
+
+Start with [Organising the UNICEF download](#c03-organise).
+
+### If you start with IPUMS MICS
+
+The guide provides resources to:
+
+- understand the structure of an IPUMS MICS extract; and
+- add AFLEARN's corrected foundational reading variables constructed from the original UNICEF data.
+
+See [Adding the correct reading data to an IPUMS extract](#c04-ipums-reading).
+
+Whichever route you use, you should also read [Survey design, weights and standard errors](#c05-survey-design) before estimating population statistics or confidence intervals.
+
+## Next steps
+
+- To download the original country files, go to [Getting data from UNICEF MICS](#c01-unicef).
+- To create a harmonised multi-country extract, go to [Getting data from IPUMS MICS](#c01-ipums).

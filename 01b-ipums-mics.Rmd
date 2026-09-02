@@ -1,0 +1,145 @@
+# Getting data from IPUMS MICS {#c01-ipums}
+
+[IPUMS MICS](https://mics.ipums.org/mics/) provides a powerful way to work with MICS data across countries. Rather than downloading every variable from every original survey file and harmonising them yourself, you select the **unit of analysis**, **surveys** and **variables** you need. IPUMS then supplies the original UNICEF source data together with syntax that harmonises your selections and builds a pooled extract.
+
+For many multi-country analyses, this substantially reduces the amount of data preparation required.
+
+However, there is an important exception for the **MICS6 foundational reading assessment**. If your research uses reading outcomes, read [A critical limitation for foundational reading](#ipums-reading-warning) below before deciding which variables to extract.
+
+## What does IPUMS MICS do?
+
+MICS questionnaires and variable coding can differ across countries and survey rounds. IPUMS MICS creates harmonised variables that make comparable concepts easier to identify and analyse across surveys.
+
+The IPUMS system also provides detailed variable-level documentation, including:
+
+- variable definitions;
+- codes and labels;
+- the surveys in which a variable is available;
+- the **universe** — the population for whom a question was asked or a variable is defined;
+- questionnaire text; and
+- links to survey-specific source documentation.
+
+This documentation is one of the major advantages of using IPUMS. IPUMS explicitly warns that researchers can make incorrect comparisons if they fail to account for differences in variable universes across MICS surveys. See the [IPUMS MICS FAQ](https://mics.ipums.org/mics-action/faq).
+
+## 1. Register as a MICS user
+
+You must be an approved UNICEF MICS data user to download an IPUMS MICS extract.
+
+IPUMS states that the same UNICEF MICS login credentials are used to access IPUMS MICS data. Registration and use are free. See [Getting Started with IPUMS MICS](https://mics.ipums.org/mics/user_guide.shtml).
+
+## 2. Choose your unit of analysis
+
+From **GET DATA**, IPUMS asks you to choose a unit of analysis. Available units include:
+
+- women;
+- children under five;
+- children aged 5–17;
+- births;
+- men;
+- household members; and
+- household characteristics.
+
+For analyses of the MICS6 Foundational Learning Skills module, your main unit of analysis will usually be **children aged 5–17**.
+
+::: {.alternativebox-header}
+**One extract has one unit of analysis**
+:::
+
+::: {.alternativebox}
+IPUMS MICS allows a single unit of analysis within an extract. If you need information from another unit — for example, household or parent characteristics — some variables may already have been attached or harmonised for your chosen unit, while other analyses may require linking files. IPUMS provides separate [guidance on linking units of analysis](https://mics.ipums.org/mics/linking.shtml).
+:::
+
+## 3. Select MICS6 samples
+
+Use the sample-selection interface to choose the MICS6 surveys required for your analysis.
+
+For a multi-country foundational-learning project, we recommend keeping a record of the exact IPUMS sample identifiers used. These sample identifiers are preferable to relying only on country names because they identify the specific survey and year.
+
+## 4. Select variables
+
+You can browse variables by topic or search for particular concepts and add them to your **Data Cart**.
+
+Before adding a variable, inspect its documentation. In particular, check:
+
+- whether it is available in all the MICS6 surveys you plan to use;
+- whether its meaning is comparable across those samples;
+- whether response categories have been harmonised;
+- the variable's universe; and
+- any survey-specific comparability notes.
+
+Some identifying and technical variables are added to IPUMS extracts automatically. We recommend retaining the identifiers and sample variables required to link records and to set up the survey design, even if you do not expect to use them immediately.
+
+## 5. Create the extract
+
+Once you have selected your samples and variables, open the Data Cart and choose **CREATE DATA EXTRACT**.
+
+IPUMS MICS differs from some other IPUMS products in how the final harmonised file is produced. According to the current IPUMS instructions, the download contains the source data and **Stata syntax**. You run the supplied main `.do` file, which applies the IPUMS harmonisation and creates the pooled dataset.
+
+See [IPUMS MICS: General Instructions for Opening an Extract](https://mics.ipums.org/mics/extract_instructions.shtml). Because the extract-building step runs Stata syntax, an R workflow needs Stata once to create the harmonised file; the saved file can then be read and analysed in R.
+
+## A critical problem with the IPUMS foundational reading data {#ipums-reading-warning}
+
+::: {.warningbox-header}
+**The IPUMS MICS reading variables should not be used for a MICS6 survey that administered more than one reading passage.**
+:::
+
+::: {.warningbox}
+In these surveys, IPUMS retains data for only one of the passages. Children assessed using another passage therefore appear to have no data on the harmonised reading variables. This is not ordinary item non-response: it systematically excludes children according to the language/passage in which they were assessed and can make estimates of reading performance seriously misleading.
+:::
+
+This issue is especially important in multilingual African countries. MICS6 allowed countries to adapt the reading assessment to local languages. The country-specific source files can therefore contain separate variables for different passages or languages, while the corresponding IPUMS harmonised reading variable represents only one of them.
+
+### Malawi illustrates the problem clearly
+
+The **Malawi MICS 2019–20** administered the reading assessment in both **English and Chichewa**. The original Malawi questionnaire contains separate English and Chichewa reading pathways, including separate results variables. UNICEF's Malawi reporting also explicitly states that the foundational reading assessment was conducted in English and Chichewa.
+
+The consequences of using the IPUMS reading variables are substantial:
+
+| Malawi MICS 2019–20 | Number of children |
+|---|---:|
+| Have `FLWORDSATTEMPT` in the IPUMS extract (English passage) | 1,720 |
+| Attempted the Chichewa passage in the original UNICEF data | 3,970 |
+| Attempted both passages | 130 |
+
+The original UNICEF source data confirm **3,970 valid observations** for `FLB20A`, the number of words attempted in the Chichewa passage. The Malawi questionnaire documentation also shows separate `FL20` and `FL20B` reading-results fields, with `FL20B` corresponding to the Chichewa passage.
+
+The implication is important. **Most children who attempted the Chichewa passage have no corresponding value in the IPUMS `FLWORDSATTEMPT` variable.** An analysis that treated the IPUMS variable as the Malawi reading sample would therefore omit the Chichewa assessment data and could give a badly distorted picture of reading performance.
+
+This is not a minor loss of information that can be addressed by dropping a few missing observations. It changes who is represented in the reading analysis.
+
+The problem is not that IPUMS has miscoded the retained passage; it is that **the other passage or passages are absent**. This limitation is specific to the harmonised foundational-reading variables in multi-passage surveys — for everything outside the reading assessment, IPUMS harmonisation remains extremely useful.
+
+### AFLEARN's solution
+
+AFLEARN reconstructs the reading data from the **original UNICEF MICS6 country files**, retaining all relevant passages and languages.
+
+We provide an R script, [`harmonize-mics-reading-v1.1.R`](https://github.com/datafirst-aflearn/MICS6-Guide/blob/main/Script/harmonize-mics-reading-v1.1.R), that harmonises the child-level foundational-reading variables directly from those files. It constructs research-ready variables using:
+
+- the child's assessment language;
+- the correct passage length for that assessment;
+- the number of words attempted;
+- the number of words read incorrectly or missed;
+- the reading comprehension items; and
+- the MICS6 reading skip patterns.
+
+The resulting file also includes identifiers that allow these variables to be merged onto an IPUMS MICS child extract.
+
+This means that researchers can use:
+
+**IPUMS MICS**  
+for harmonised demographic, household, schooling and other background variables
+
+**+**
+
+**AFLEARN reading file constructed from the original UNICEF MICS data**  
+for complete and correctly constructed foundational reading outcomes.
+
+The step-by-step merge instructions are in [Adding the correct reading data to an IPUMS extract](#c04-ipums-reading).
+
+The reading limitation is therefore a reason to **supplement** IPUMS, not a reason to avoid it.
+
+## Next steps
+
+Before building an extract, read [What's in MICS6 data?](#c02-whats-in-data) to understand the MICS survey structure and the FLS module.
+
+If you already have an IPUMS extract, continue to [Adding the correct reading data to an IPUMS extract](#c04-ipums-reading).

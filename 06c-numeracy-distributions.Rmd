@@ -1,0 +1,152 @@
+# Worked example 2: Indicators versus distributions {#c06-numeracy-distributions}
+
+## Research question
+
+> Does the headline foundational-numeracy indicator tell the same story as the underlying distribution of numeracy performance?
+
+MICS6 contains 21 numeracy items across four domains:
+
+- 6 number-identification items;
+- 5 number-discrimination items;
+- 5 addition items; and
+- 5 number-pattern items.
+
+A binary indicator is useful for communication, but it compresses a large amount of information.
+
+## Construct the total score
+
+Using the preparation code, define:
+
+```text
+numeracy_total = number of items correct out of 21
+```
+
+The production version should also contain:
+
+```text
+foundational_numeracy
+```
+
+validated against published MICS tabulations.
+
+## Compare the two measures
+
+### R
+
+```{r eval=FALSE}
+num_des <- des %>%
+  filter(age >= 7, age <= 14)
+
+num_des %>%
+  group_by(country_iso3) %>%
+  summarise(
+    mean_score = survey_mean(
+      numeracy_total,
+      vartype = "ci",
+      na.rm = TRUE
+    ),
+    foundational = survey_mean(
+      foundational_numeracy,
+      vartype = "ci",
+      na.rm = TRUE
+    )
+  )
+```
+
+### Stata
+
+```stata
+svy, subpop(if inrange(age,7,14)): ///
+    mean numeracy_total foundational_numeracy, ///
+    over(country_iso3)
+```
+
+## Look at the score distribution
+
+For one country:
+
+```{r eval=FALSE}
+des %>%
+  filter(
+    country_iso3 == "MWI",
+    age >= 7,
+    age <= 14
+  ) %>%
+  group_by(numeracy_total) %>%
+  summarise(
+    share = survey_mean(
+      proportion = TRUE,
+      na.rm = TRUE
+    )
+  )
+```
+
+A histogram or weighted frequency plot can make the distribution visible.
+
+## Compare the four domains
+
+```{r eval=FALSE}
+des %>%
+  filter(age >= 7, age <= 14) %>%
+  group_by(country_iso3) %>%
+  summarise(
+    number_id = survey_mean(
+      n_number_id / 6,
+      na.rm = TRUE
+    ),
+    compare = survey_mean(
+      n_number_compare / 5,
+      na.rm = TRUE
+    ),
+    addition = survey_mean(
+      n_number_add / 5,
+      na.rm = TRUE
+    ),
+    pattern = survey_mean(
+      n_number_pattern / 5,
+      na.rm = TRUE
+    )
+  )
+```
+
+These are **average shares of items correct**, not the official MICS task indicators. Label them accordingly.
+
+## Why this matters
+
+Consider two children:
+
+```text
+Child A: 20/21
+Child B:  4/21
+```
+
+A stringent binary proficiency measure can classify both below the benchmark even though their observed skill profiles are very different.
+
+This matters particularly when:
+
+- overall proficiency is low;
+- comparing socioeconomic groups;
+- studying progress by grade; or
+- diagnosing which components of numeracy are most difficult.
+
+## Suggested figure
+
+A useful two-panel publication figure would show:
+
+```text
+Panel A: % meeting foundational numeracy
+Panel B: mean total score out of 21
+```
+
+for the same countries.
+
+The comparison makes visible where the ranking or apparent size of cross-country differences changes when the full score distribution is used.
+
+## Output to add after running
+
+Add:
+
+- country means and confidence intervals;
+- the proficiency estimates;
+- one example score distribution; and
+- a brief discussion of where the binary indicator compresses meaningful variation.

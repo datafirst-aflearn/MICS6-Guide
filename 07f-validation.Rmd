@@ -1,0 +1,298 @@
+# Validation and reproducibility {#c07-validation}
+
+A harmonisation script can run without errors and still produce the wrong data.
+
+AFLEARN therefore recommends validating at three levels:
+
+```text
+structural checks
+      +
+distribution checks
+      +
+external checks
+```
+
+## 1. Structural checks
+
+For every survey, verify:
+
+### Unique selected-child identifiers
+
+```{r eval=FALSE}
+d %>%
+  count(HH1, HH2, LN) %>%
+  filter(n > 1)
+```
+
+Expected:
+
+```text
+0 rows
+```
+
+### Expected survey size
+
+Compare the number of harmonised FS records with the original `fs.sav`.
+
+A harmonisation that unexpectedly drops children should fail loudly or report the exclusions explicitly.
+
+### Required fields
+
+Check that required variables exist:
+
+```{r eval=FALSE}
+required <- c(
+  "country_iso3",
+  "year",
+  "HH1",
+  "HH2",
+  "LN",
+  "age",
+  "fsweight"
+)
+
+setdiff(required, names(d))
+```
+
+For the revised guide also require:
+
+```text
+PSU
+stratum
+```
+
+## 2. Range and coding checks
+
+Examples:
+
+```{r eval=FALSE}
+range(d$age, na.rm = TRUE)
+
+table(
+  d$current_level_h,
+  useNA = "ifany"
+)
+
+summary(d$fsweight)
+
+table(
+  d$reading_status,
+  useNA = "ifany"
+)
+```
+
+For reading:
+
+```{r eval=FALSE}
+summary(reading$reading_accuracy)
+
+reading %>%
+  filter(reading_accuracy > 1)
+```
+
+Any accuracy above 1 requires investigation.
+
+For numeracy, after creating a total score:
+
+```{r eval=FALSE}
+range(d$numeracy_total, na.rm = TRUE)
+```
+
+should remain within:
+
+```text
+0 to 21
+```
+
+## 3. Routing checks
+
+Variables should follow the questionnaire logic.
+
+Examples:
+
+```text
+children outside ages 7–14
+→ should not have a normal FLS reading outcome
+
+failed practice
+→ should not have a valid main-passage score unless the country questionnaire legitimately permits it
+
+reading_status = attempted
+→ should have a valid passage/score
+
+reading_status = foundational
+→ should meet the underlying word/comprehension criteria
+```
+
+Write these as automated tests where possible.
+
+For example:
+
+```{r eval=FALSE}
+stopifnot(
+  all(
+    is.na(reading$reading_score[
+      reading$reading_status == 1
+    ])
+  )
+)
+```
+
+Country exceptions should be documented rather than weakening the test globally.
+
+## 4. Cross-file merge checks
+
+Whenever `hl`, `hh`, reading or IPUMS data are linked:
+
+- confirm key uniqueness before the merge;
+- report unmatched records;
+- confirm the number of analysis rows after the merge; and
+- compare key distributions before and after.
+
+Do not routinely discard `_merge != 3` or unmatched rows without understanding them.
+
+## 5. Compare with published MICS results
+
+For indicators that MICS itself publishes, reproduction is one of the strongest validation checks available.
+
+Examples include:
+
+- foundational-reading classifications;
+- foundational numeracy;
+- school attendance;
+- selected household/child characteristics.
+
+A discrepancy should trigger investigation of:
+
+```text
+denominator
+age restriction
+weight
+routing
+indicator definition
+rounding convention
+survey year
+```
+
+rather than an immediate assumption that either source is wrong.
+
+## Reading-threshold validation
+
+AFLEARN's rounded-down integer cutoff for the 90% reading-accuracy requirement was retained because alternative implementations were compared with published MICS classifications and the rounded-down convention reproduced those classifications.
+
+This should remain part of the regression test for the reading script.
+
+If a future edit changes the reading construction, rerun the country-level comparison against the MICS publications.
+
+## 6. Validate multilingual reading separately
+
+For every multi-passage survey check:
+
+```text
+number attempting each passage
+passage-language distribution
+passage length
+multiple-attempt count
+reading-status distribution
+```
+
+For Malawi, the validation should specifically confirm that Chichewa assessments are retained rather than disappearing from the analysis sample.
+
+## 7. Survey-design checks
+
+Once `PSU` and `stratum` are retained in the FS harmonisation, check:
+
+```{r eval=FALSE}
+d %>%
+  summarise(
+    missing_psu = sum(is.na(PSU)),
+    missing_stratum = sum(is.na(stratum))
+  )
+```
+
+and:
+
+```{r eval=FALSE}
+d %>%
+  distinct(
+    country_iso3,
+    year,
+    stratum,
+    PSU
+  ) %>%
+  count(
+    country_iso3,
+    year,
+    stratum,
+    name = "n_psu"
+  )
+```
+
+Unexpected single-PSU strata or missing design variables should be investigated against the country sampling documentation.
+
+## 8. Version the scripts and outputs together
+
+A published harmonised dataset should identify the exact processing version used.
+
+For example:
+
+```text
+FS harmonisation      v1.1
+Reading harmonisation v1.2
+Guide                  2026-08
+```
+
+A useful release structure is:
+
+```text
+release/
+├── scripts/
+├── crosswalks/
+├── country-notes/
+├── validation/
+└── README
+```
+
+The validation directory can contain machine-readable summaries such as:
+
+```text
+survey_counts.csv
+reading_status_checks.csv
+published_indicator_comparison.csv
+merge_checks.csv
+```
+
+## 9. Keep raw data immutable
+
+The processing workflow should never edit the original UNICEF source files.
+
+A reproducible project keeps:
+
+```text
+raw source data
+      ↓
+processing scripts
+      ↓
+derived harmonised files
+```
+
+so every result can be regenerated from the original inputs.
+
+## 10. Minimum validation before adding a new survey
+
+Before a survey is added to the AFLEARN supported list:
+
+- [ ] FS identifiers are unique.
+- [ ] Key questionnaire variables have been checked against the survey questionnaire.
+- [ ] Education-level mappings have been reviewed.
+- [ ] Survey weights/design variables are present.
+- [ ] Reading passage(s) and languages have been identified.
+- [ ] Passage length has been validated.
+- [ ] Reading routing has been checked.
+- [ ] Reading classifications reproduce published results where available.
+- [ ] Numeracy indicator reproduces published results if constructed.
+- [ ] Crosswalk and country notes have been updated.
+- [ ] No unexplained records fall into `reading_status = 9`.
+- [ ] All output files regenerate cleanly from the scripts.
+
+This makes extending the guide slower than simply appending another country — but substantially safer.

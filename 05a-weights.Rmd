@@ -1,0 +1,138 @@
+# Which MICS weight should I use? {#c05-weights}
+
+MICS provides different weights for different questionnaire populations.
+
+For example, standard MICS6 files include weights such as:
+
+| File/population | Standard weight |
+|---|---|
+| Household | `hhweight` |
+| Women | `wmweight` |
+| Men, where applicable | `mnweight` |
+| Children under five | `chweight` |
+| Selected children aged 5–17 | `fsweight` |
+
+The [MICS6 Manual for Statistical Data Analysis](https://data.unicef.org/wp-content/uploads/2019/07/MICS6-manual-for-stats-data-analysis-English_2020_v2.pdf) explains that questionnaire-specific weights are attached to the corresponding datasets.
+
+## For foundational-learning analysis, normally use `fsweight`
+
+The FLS assessment is administered within the Questionnaire for Children Age 5–17, for which one eligible child is randomly selected per household.
+
+That extra within-household selection step matters.
+
+A child in a household containing several eligible 5–17-year-olds has a lower probability of being selected for `fs` than an otherwise comparable child who is the only eligible child in their household.
+
+`fsweight` accounts for the selected-child sampling process.
+
+So, for example:
+
+```text
+Outcome: foundational numeracy
+Population: children aged 7–14 in fs
+Weight: fsweight
+```
+
+and:
+
+```text
+Outcome: reading accuracy
+Population: children who reached the reading passage
+Base analysis file: fs
+Weight: fsweight
+```
+
+The fact that the outcome is defined only for a subgroup does not mean a new questionnaire weight is required.
+
+## The weight follows the analysis population, not the source of each variable
+
+Suppose you start with `fs` and merge household wealth from `hh`:
+
+```text
+fs:
+child learning outcome
+child age
+fsweight
+
+        +
+
+hh:
+household wealth
+
+        ↓
+
+one row per selected child
+```
+
+Your unit of analysis is still the selected child.
+
+Use:
+
+```text
+fsweight
+```
+
+not:
+
+```text
+hhweight
+```
+
+Similarly, adding a parent's education from `hl` or another linked file does not turn the analysis into a household-member analysis.
+
+::: {.alternativebox-header}
+**Ask "what does one row represent?"**
+:::
+
+::: {.alternativebox}
+That question is usually more useful than asking which file a covariate originally came from.
+:::
+
+## What is `fshweight`?
+
+MICS6 `fs` files also commonly contain:
+
+```text
+fshweight
+```
+
+labelled the **Children 5–17 household sample weight**.
+
+This is distinct from `fsweight`.
+
+For ordinary child-level analyses of the randomly selected 5–17-year-old — including FLS outcomes — use **`fsweight`**.
+
+The distinction is important because `fsweight` incorporates the selection of one child from the eligible 5–17-year-olds in the household, whereas the household-level weight does not represent each selected child with that within-household selection adjustment.
+
+## Do I need to divide the weight by 1,000 or another constant?
+
+Not for standard estimates of means, proportions or regression coefficients.
+
+Multiplying every weight in one survey by the same positive constant does not change a weighted mean or proportion. The MICS weights can therefore normally be supplied to survey software as released.
+
+Do **not** rescale weights simply because another survey programme uses a particular scaling convention.
+
+## A note on population totals
+
+MICS analysis weights are commonly normalised rather than expansion weights to a known national population total.
+
+That means they are appropriate for estimating proportions, means and relationships, but the sum of weights should not automatically be interpreted as the number of people in the national population.
+
+If your research question requires **population counts or totals**, consult the country sampling documentation and determine whether an additional population-calibration step is required.
+
+## Weighting does not replace the survey design
+
+This is not enough:
+
+```r
+weighted.mean(outcome, fsweight)
+```
+
+and this is not enough for inference:
+
+```stata
+mean outcome [pw=fsweight]
+```
+
+These can produce a weighted point estimate, but they do not fully specify the clustered and stratified MICS design.
+
+For design-correct standard errors, set up the complete survey design as shown on the next page.
