@@ -1,19 +1,10 @@
 # Worked examples {#c06-worked-examples}
 
-This section moves from **data preparation** to **research questions**.
+This chapter moves from data preparation to research questions.
 
-Rather than providing a generic R or Stata tutorial, each example starts with a question that researchers might genuinely ask of MICS6 Foundational Learning Skills data and then works through:
+Each example starts with a question that researchers might genuinely ask of MICS6 Foundational Learning Skills data and then works through the population being studied, the variables required, the survey design, the analysis, a suggested visualisation, and the interpretation.
 
-1. the population being studied;
-2. the variables required;
-3. the survey design;
-4. the analysis;
-5. a suggested visualisation; and
-6. the interpretation.
-
-The examples use the AFLEARN harmonised selected-child and reading files developed in Sections 3 and 4.
-
-## The examples
+The examples use the AFLEARN harmonised selected-child and reading files developed in [Preparing UNICEF data](#c03-prepare-unicef) and [Preparing IPUMS data](#c04-prepare-ipums).
 
 | Example | Question |
 |---|---|
@@ -27,18 +18,7 @@ The examples use the AFLEARN harmonised selected-child and reading files develop
 | [Learning by grade and age](#c06-grade-trajectories) | How does performance change across grades, and how does age complicate interpretation? |
 | [Timing within the school year](#c06-school-timing) | Are children labelled as the same grade equally far through that grade? |
 
-## R and Stata
-
-Each page includes both R and Stata code.
-
-The complete scripts are also provided as:
-
-```text
-Script/worked-examples.R
-Script/worked-examples.do
-```
-
-The scripts are designed as **templates**. They use actual AFLEARN harmonised variable names where those names are already fixed in the current processing scripts.
+Each page includes both R and Stata code. The complete scripts are also provided as `Script/worked-examples.R` and `Script/worked-examples.do`. The scripts are templates. They use actual AFLEARN harmonised variable names where those names are already fixed in the current processing scripts.
 
 A small number of variables still require additions or merges: survey-design variables are covered in [Prepare the analysis data](#c06-prepare-analysis), and wealth in [Learning inequalities by wealth](#c06-wealth).
 
@@ -50,10 +30,6 @@ A small number of variables still require additions or merges: survey-design var
 The text explains what to look for. Numerical findings and graph-specific interpretation should be written only after running the code on the final harmonised datasets.
 :::
 
-## What these examples are — and are not
-
-The examples demonstrate sound ways to use MICS6 data.
-
-They are not intended to prescribe one preferred outcome for every research question. In particular, AFLEARN encourages researchers to look beyond binary foundational-learning indicators when the underlying item-level data answer the question more directly.
+The examples demonstrate sound ways to use MICS6 data. They are not intended to prescribe one preferred outcome for every research question. In particular, AFLEARN encourages researchers to look beyond binary foundational-learning indicators when the underlying item-level data answer the question more directly.
 
 The MICS6 FLS module contains the individual numeracy items and detailed reading information required for this type of analysis, while the household-survey design allows learning to be studied among both in-school and out-of-school children.

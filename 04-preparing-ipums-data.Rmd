@@ -1,0 +1,20 @@
+# Preparing IPUMS data {#c04-prepare-ipums}
+
+IPUMS MICS supplies harmonised background variables across surveys. For foundational reading, those variables are incomplete in countries that administered more than one passage. The limitation is set out in [Getting data from IPUMS MICS](#c01-ipums).
+
+This chapter shows how to keep the IPUMS extract for demographic, household and schooling variables and attach AFLEARN's reading file, which is built from the original UNICEF country files.
+
+The linking identifiers are:
+
+```text
+AFLEARN             IPUMS
+--------------------------------
+cluster        <->  CLUSTER
+hhno           <->  HHNO
+linech         <->  LINECH
+survey/sample  <->  SAMPLE
+```
+
+The original MICS6 identifiers underlying these are `HH1` → `CLUSTER`, `HH2` → `HHNO`, and the selected child's line number → `LINECH`. IPUMS's official linking guidance confirms that `SAMPLE`, `CLUSTER`, `HHNO` and the person line number are the key identifying variables in pooled extracts.
+
+[Adding the correct reading data to an IPUMS extract](#c04-ipums-reading) walks through the merge. [Validating the combined file](#c04-validate) checks that multi-passage surveys, Malawi in particular, are represented in full.

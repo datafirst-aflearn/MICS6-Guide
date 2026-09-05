@@ -1,6 +1,6 @@
-# Worked example 6: In-school and out-of-school children {#c06-schooling-status}
+## In-school and out-of-school children {#c06-schooling-status}
 
-## Research question
+### Research question
 
 > At the same age, how does learning differ between children who are currently in school and those who are out of school?
 
@@ -8,15 +8,9 @@ This is one of the distinctive advantages of a household-based learning assessme
 
 A school-based assessment cannot observe children who are not enrolled or not attending the sampled schools. MICS can.
 
-## Define current schooling status
+### Define current schooling status
 
-The harmonised variable:
-
-```text
-enrolled
-```
-
-records whether the child attended school or an early childhood education programme during the current school year.
+The harmonised variable `enrolled` records whether the child attended school or an early childhood education programme during the current school year.
 
 For school-age analysis:
 
@@ -33,7 +27,7 @@ d <- d %>%
 
 Re-create the design object after adding the variable.
 
-## Why compare within age?
+### Why compare within age?
 
 A simple comparison of all in-school and out-of-school children can be misleading because the groups may have very different age distributions.
 
@@ -41,9 +35,9 @@ Older adolescents are more likely to have left school in many settings and have 
 
 Compare children of the same age, or adjust for age.
 
-## Descriptive comparison by age
+### Descriptive comparison by age
 
-### R
+#### R
 
 ```{r eval=FALSE}
 des %>%
@@ -65,7 +59,7 @@ des %>%
   )
 ```
 
-### Stata
+#### Stata
 
 ```stata
 svy, subpop(if inrange(age,10,14)): ///
@@ -73,9 +67,9 @@ svy, subpop(if inrange(age,10,14)): ///
     over(country_iso3 age in_school)
 ```
 
-## Age-adjusted comparison
+### Age-adjusted comparison
 
-### R
+#### R
 
 ```{r eval=FALSE}
 model <- svyglm(
@@ -91,15 +85,13 @@ summary(model)
 
 This estimates the association between current school attendance and numeracy conditional on age.
 
-It is **not a causal estimate of the effect of attending school**.
+It is not a causal estimate of the effect of attending school.
 
 Children who remain in school differ from children who leave school in many observed and unobserved ways.
 
-## Reading
+### Reading
 
 The same analysis can be performed for reading, but first define the relevant reading population using `reading_status`.
-
-For example:
 
 ```{r eval=FALSE}
 read_des <- des %>%
@@ -110,15 +102,9 @@ read_des <- des %>%
   )
 ```
 
-Then compare:
+Then compare `max_reading_accuracy` or another clearly defined reading outcome.
 
-```text
-max_reading_accuracy
-```
-
-or another clearly defined reading outcome.
-
-## Interpretation
+### Interpretation
 
 The value of this analysis is descriptive:
 
@@ -130,7 +116,7 @@ Do not write:
 
 The household-survey data do not identify that causal effect without a separate research design.
 
-## Suggested figure
+### Suggested figure
 
 For ages 10–14:
 

@@ -11,18 +11,21 @@ rmd_files:
   - index.Rmd
   - 01-getting-mics6-data.Rmd
   - 01a-unicef-mics.Rmd
-  - 01b-ipums-mics.Rmd
+  - 01b-organise-download.Rmd
+  - 01c-ipums-mics.Rmd
   - 02-whats-in-mics6-data.Rmd
   - 02a-files-identifiers.Rmd
   - 02b-fs-sample.Rmd
   - 02c-foundational-learning.Rmd
   - 02d-reading-assessment.Rmd
   - 02e-numeracy-assessment.Rmd
-  - 03a-organise-download.Rmd
-  - 03b-merge-files.Rmd
-  - 03c-harmonise-countries.Rmd
-  - 03d-reading-variables.Rmd
+  - 03-preparing-unicef-data.Rmd
+  - 03a-merge-files.Rmd
+  - 03b-harmonise-countries.Rmd
+  - 03c-reading-variables.Rmd
+  - 04-preparing-ipums-data.Rmd
   - 04a-ipums-reading.Rmd
+  - 04b-validate-merge.Rmd
   - 05-survey-design.Rmd
   - 05a-weights.Rmd
   - 05b-single-survey.Rmd

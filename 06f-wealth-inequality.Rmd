@@ -1,6 +1,6 @@
-# Worked example 5: Learning inequalities by wealth {#c06-wealth}
+## Learning inequalities by wealth {#c06-wealth}
 
-## Research question
+### Research question
 
 > Do wealth inequalities look the same when learning is measured using a binary proficiency indicator versus the full score distribution?
 
@@ -8,17 +8,11 @@ This example illustrates why outcome choice matters.
 
 When overall proficiency is very low, children in both the poorest and richest quintiles may mostly fall below the benchmark. A binary indicator can therefore make the groups look more similar than their underlying performance actually is.
 
-## Data requirement
+### Data requirement
 
 The current AFLEARN FS harmonised file does not contain wealth.
 
-Add:
-
-```text
-windex5
-```
-
-from the household file, or request `WINDEX5` in an IPUMS extract.
+Add `windex5` from the household file, or request `WINDEX5` in an IPUMS extract.
 
 Standard MICS wealth quintiles are:
 
@@ -30,9 +24,9 @@ Standard MICS wealth quintiles are:
 5 richest
 ```
 
-## Compare proficiency by wealth
+### Compare proficiency by wealth
 
-### R
+#### R
 
 ```{r eval=FALSE}
 des %>%
@@ -47,7 +41,7 @@ des %>%
   )
 ```
 
-### Stata
+#### Stata
 
 ```stata
 svy, subpop(if inrange(age,7,14)): ///
@@ -55,9 +49,9 @@ svy, subpop(if inrange(age,7,14)): ///
     over(country_iso3 windex5)
 ```
 
-## Compare average numeracy score by wealth
+### Compare average numeracy score by wealth
 
-### R
+#### R
 
 ```{r eval=FALSE}
 des %>%
@@ -72,7 +66,7 @@ des %>%
   )
 ```
 
-### Stata
+#### Stata
 
 ```stata
 svy, subpop(if inrange(age,7,14)): ///
@@ -80,7 +74,7 @@ svy, subpop(if inrange(age,7,14)): ///
     over(country_iso3 windex5)
 ```
 
-## Focus on poorest versus richest
+### Focus on poorest versus richest
 
 A compact inequality measure is the richest-poorest difference.
 
@@ -100,7 +94,7 @@ summary(model)
 
 The coefficient on the richest category relative to the poorest gives the adjusted-by-design difference in mean score, with no other covariates.
 
-## Why the two inequality measures can differ
+### Why the two inequality measures can differ
 
 Imagine:
 
@@ -121,7 +115,7 @@ The mean score asks:
 
 For inequality analysis, showing both is often more informative.
 
-## Suggested figure
+### Suggested figure
 
 For each country, plot two wealth gradients:
 
@@ -132,18 +126,10 @@ Panel B: mean score by wealth quintile
 
 Use the same quintile ordering and clearly different y-axis labels.
 
-## Extension to reading
+### Extension to reading
 
-The same logic can be applied to:
+The same logic can be applied to `max_reading_skills`, `max_reading_accuracy` and `max_reading_score`, provided the reading analysis sample and `reading_status` are handled explicitly.
 
-```text
-max_reading_skills
-max_reading_accuracy
-max_reading_score
-```
-
-provided the reading analysis sample and `reading_status` are handled explicitly.
-
-## Output to add after running
+### Output to add after running
 
 Select two or three countries that illustrate different patterns rather than reproducing all countries in the body of the guide. The full results can remain in downloadable code/output.

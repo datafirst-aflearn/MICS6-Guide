@@ -1,4 +1,4 @@
-# Validation and reproducibility {#c07-validation}
+## Validation and reproducibility {#c07-validation}
 
 A harmonisation script can run without errors and still produce the wrong data.
 
@@ -12,11 +12,11 @@ distribution checks
 external checks
 ```
 
-## 1. Structural checks
+### 1. Structural checks
 
 For every survey, verify:
 
-### Unique selected-child identifiers
+#### Unique selected-child identifiers
 
 ```{r eval=FALSE}
 d %>%
@@ -30,13 +30,13 @@ Expected:
 0 rows
 ```
 
-### Expected survey size
+#### Expected survey size
 
 Compare the number of harmonised FS records with the original `fs.sav`.
 
 A harmonisation that unexpectedly drops children should fail loudly or report the exclusions explicitly.
 
-### Required fields
+#### Required fields
 
 Check that required variables exist:
 
@@ -54,14 +54,9 @@ required <- c(
 setdiff(required, names(d))
 ```
 
-For the revised guide also require:
+For the revised guide also require `PSU` and `stratum`.
 
-```text
-PSU
-stratum
-```
-
-## 2. Range and coding checks
+### 2. Range and coding checks
 
 Examples:
 
@@ -98,13 +93,9 @@ For numeracy, after creating a total score:
 range(d$numeracy_total, na.rm = TRUE)
 ```
 
-should remain within:
+should remain within 0 to 21.
 
-```text
-0 to 21
-```
-
-## 3. Routing checks
+### 3. Routing checks
 
 Variables should follow the questionnaire logic.
 
@@ -140,7 +131,7 @@ stopifnot(
 
 Country exceptions should be documented rather than weakening the test globally.
 
-## 4. Cross-file merge checks
+### 4. Cross-file merge checks
 
 Whenever `hl`, `hh`, reading or IPUMS data are linked:
 
@@ -151,16 +142,11 @@ Whenever `hl`, `hh`, reading or IPUMS data are linked:
 
 Do not routinely discard `_merge != 3` or unmatched rows without understanding them.
 
-## 5. Compare with published MICS results
+### 5. Compare with published MICS results
 
 For indicators that MICS itself publishes, reproduction is one of the strongest validation checks available.
 
-Examples include:
-
-- foundational-reading classifications;
-- foundational numeracy;
-- school attendance;
-- selected household/child characteristics.
+Examples include foundational-reading classifications, foundational numeracy, school attendance, and selected household/child characteristics.
 
 A discrepancy should trigger investigation of:
 
@@ -176,7 +162,7 @@ survey year
 
 rather than an immediate assumption that either source is wrong.
 
-## Reading-threshold validation
+### Reading-threshold validation
 
 AFLEARN's rounded-down integer cutoff for the 90% reading-accuracy requirement was retained because alternative implementations were compared with published MICS classifications and the rounded-down convention reproduced those classifications.
 
@@ -184,7 +170,7 @@ This should remain part of the regression test for the reading script.
 
 If a future edit changes the reading construction, rerun the country-level comparison against the MICS publications.
 
-## 6. Validate multilingual reading separately
+### 6. Validate multilingual reading separately
 
 For every multi-passage survey check:
 
@@ -196,9 +182,9 @@ multiple-attempt count
 reading-status distribution
 ```
 
-For Malawi, the validation should specifically confirm that Chichewa assessments are retained rather than disappearing from the analysis sample.
+For Malawi, the validation should specifically confirm that Chichewa assessments are retained rather than disappearing from the analysis sample. The source counts are in [Reading-variable construction](#c07-reading-construction).
 
-## 7. Survey-design checks
+### 7. Survey-design checks
 
 Once `PSU` and `stratum` are retained in the FS harmonisation, check:
 
@@ -230,7 +216,7 @@ d %>%
 
 Unexpected single-PSU strata or missing design variables should be investigated against the country sampling documentation.
 
-## 8. Version the scripts and outputs together
+### 8. Version the scripts and outputs together
 
 A published harmonised dataset should identify the exact processing version used.
 
@@ -262,7 +248,7 @@ published_indicator_comparison.csv
 merge_checks.csv
 ```
 
-## 9. Keep raw data immutable
+### 9. Keep raw data immutable
 
 The processing workflow should never edit the original UNICEF source files.
 
@@ -278,7 +264,7 @@ derived harmonised files
 
 so every result can be regenerated from the original inputs.
 
-## 10. Minimum validation before adding a new survey
+### 10. Minimum validation before adding a new survey
 
 Before a survey is added to the AFLEARN supported list:
 

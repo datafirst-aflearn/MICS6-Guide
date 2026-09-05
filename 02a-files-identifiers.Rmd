@@ -1,10 +1,10 @@
-# Files, units of observation and identifiers {#c02-files}
+## Files, units of observation and identifiers {#c02-files}
 
-## Why does MICS have separate files?
+### Why does MICS have separate files?
 
-MICS6 is built from several questionnaires. Different questionnaires collect information about different populations, so the resulting datasets have different **units of observation**.
+MICS6 is built from several questionnaires. Different questionnaires collect information about different populations, so the resulting datasets have different units of observation.
 
-For example, a household has one record in the household file, but every person listed in that household has a separate record in the household-member file. One randomly selected child aged 5–17 may then have a further record in the `fs` file.
+A household has one record in the household file, but every person listed in that household has a separate record in the household-member file. One randomly selected child aged 5–17 may then have a further record in the `fs` file.
 
 UNICEF's MICS6 statistical analysis manual describes five core questionnaire groups:
 
@@ -16,7 +16,7 @@ UNICEF's MICS6 statistical analysis manual describes five core questionnaire gro
 
 See the [MICS6 Manual for Statistical Data Analysis](https://data.unicef.org/wp-content/uploads/2019/07/MICS6-manual-for-stats-data-analysis-English_2020_v2.pdf).
 
-## Common MICS6 data files
+### Common MICS6 data files
 
 The exact files available can vary with the questionnaires and modules implemented in a country. The following are the files researchers are most likely to encounter.
 
@@ -35,10 +35,10 @@ The exact files available can vary with the questionnaires and modules implement
 :::
 
 ::: {.alternativebox}
-The FLS assessment is in the **`fs` file**. However, that does not mean everything you need for an analysis is in `fs`. Household and household-member characteristics often need to be added from `hh` and `hl`.
+The FLS assessment is in the `fs` file. That does not mean everything you need for an analysis is in `fs`. Household and household-member characteristics often need to be added from `hh` and `hl`.
 :::
 
-## The `hh` file: one record per household
+### The `hh` file: one record per household
 
 The household file contains information that applies at household level.
 
@@ -51,8 +51,6 @@ HH2 = household number
 
 Within a survey, the combination of `HH1` and `HH2` identifies the sampled household.
 
-Conceptually:
-
 ```text
 HH1    HH2       household
 101     01       household A
@@ -62,7 +60,7 @@ HH1    HH2       household
 
 If you merge household-level information onto an individual-level file, every individual from the same household receives the same household information.
 
-## The `hl` file: one record per household member
+### The `hl` file: one record per household member
 
 The household listing contains one record for each person listed as a member of the household.
 
@@ -72,13 +70,7 @@ It therefore needs one additional identifier:
 HH1 + HH2 + HL1
 ```
 
-where:
-
-- `HH1` identifies the cluster;
-- `HH2` identifies the household within the cluster; and
-- `HL1` is the household member's **line number**.
-
-For example:
+where `HH1` identifies the cluster, `HH2` identifies the household within the cluster, and `HL1` is the household member's line number.
 
 ```text
 HH1    HH2    HL1
@@ -95,10 +87,10 @@ The first three observations are three different people in the same household.
 :::
 
 ::: {.alternativebox}
-`HL1 = 2` does not identify a person by itself. Many households have a member on line 2. An individual must be identified using the household identifiers **and** the line number.
+`HL1 = 2` does not identify a person by itself. Many households have a member on line 2. An individual must be identified using the household identifiers and the line number.
 :::
 
-## The `fs` file: one selected child per household
+### The `fs` file: one selected child per household
 
 The `fs` dataset contains the Questionnaire for Children Age 5–17.
 
@@ -124,29 +116,15 @@ hl:  HH1 + HH2 + HL1
 
 This is the basis for adding household-roster information about the selected child.
 
-## Household links versus person links
+### Household links versus person links
 
-This distinction is fundamental.
+#### Linking `fs` to `hh`
 
-### Linking `fs` to `hh`
+If you want a household characteristic, you link using `HH1 + HH2`. Examples include household wealth, location, water and sanitation, household size, or another household-level characteristic.
 
-If you want a **household characteristic**, you link using:
+#### Linking the selected child in `fs` to their own `hl` record
 
-```text
-HH1 + HH2
-```
-
-For example:
-
-- household wealth;
-- household location;
-- water and sanitation;
-- household size; or
-- another household-level characteristic.
-
-### Linking the selected child in `fs` to their own `hl` record
-
-If you want information about **that child** from the household roster, you link:
+If you want information about that child from the household roster, you link:
 
 ```text
 fs: HH1 + HH2 + LN
@@ -155,11 +133,11 @@ hl: HH1 + HH2 + HL1
 
 For example, you may want to check or add information recorded for the child in the household questionnaire.
 
-### Linking the child to another person
+#### Linking the child to another person
 
-Some variables in the child questionnaire contain the household line number of **another household member**.
+Some variables in the child questionnaire contain the household line number of another household member.
 
-For example, `FS4` records the line number of the child's mother or caretaker in the standard MICS6 questionnaire.
+`FS4` records the line number of the child's mother or caretaker in the standard MICS6 questionnaire.
 
 This is a different type of link:
 
@@ -183,9 +161,9 @@ If that person is also eligible for another individual questionnaire, their line
 A merge on `HH1 + HH2` attaches household-level information. A merge on `HH1 + HH2 + line number` identifies a particular person. These are analytically different operations.
 :::
 
-We provide tested R and Stata code for these common links in [Merging MICS6 files within a country](#c03-merge).
+Tested R and Stata code for these common links is in [Merging MICS6 files within a country](#c03-merge).
 
-## A visual map of the files used most often in learning research
+### A visual map of the files used most often in learning research
 
 ```text
                          HOUSEHOLD
@@ -212,19 +190,19 @@ We provide tested R and Stata code for these common links in [Merging MICS6 file
                     mother/caretaker link
 ```
 
-## Do not merge files until you know the unit of analysis
+### Do not merge files until you know the unit of analysis
 
-Suppose your research question is:
+Suppose the research question is:
 
 > What proportion of children aged 10 have foundational numeracy skills, by household wealth?
 
-Your unit of analysis is the **selected child**, so `fs` should remain the analysis file. You add the household characteristic to those child records.
+The unit of analysis is the selected child, so `fs` should remain the analysis file. You add the household characteristic to those child records.
 
 You should not turn the household file into the analysis population simply because the wealth variable comes from `hh`.
 
-This distinction also determines which survey weight you use. We return to this in [Survey design, weights and standard errors](#c05-survey-design).
+This distinction also determines which survey weight you use. See [Which MICS weight should I use?](#c05-weights).
 
-## Variable names can differ
+### Variable names can differ
 
 The names above reflect the standard MICS6 structure, but country datasets can contain adaptations and additional variables. Always consult:
 

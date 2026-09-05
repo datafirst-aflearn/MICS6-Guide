@@ -14,19 +14,9 @@ specify the survey design
 analyse
 ```
 
-This final section documents what happens **under the hood**.
+This final chapter documents what happens under the hood. It is intended for researchers who need to understand exactly how AFLEARN variables were constructed; analysts adapting the harmonisation to additional MICS6 surveys; reviewers checking reproducibility; maintainers updating the processing scripts; and users who encounter a country-specific coding issue.
 
-It is intended for:
-
-- researchers who need to understand exactly how AFLEARN variables were constructed;
-- analysts adapting the harmonisation to additional MICS6 surveys;
-- reviewers checking reproducibility;
-- maintainers updating the processing scripts; and
-- users who encounter a country-specific coding issue.
-
-You do **not** need to read every page here before using the harmonised datasets.
-
-## What is documented here?
+You do not need to read every page here before using the harmonised datasets.
 
 | Page | Purpose |
 |---|---|
@@ -37,9 +27,7 @@ You do **not** need to read every page here before using the harmonised datasets
 | [Why current_grade is not the child's grade](#c07-current-grade) | Why grade restarts within education levels and how to construct an administrative grade |
 | [Validation and reproducibility](#c07-validation) | Checks that should be run whenever the harmonisation is changed |
 
-## The two AFLEARN harmonisation products
-
-AFLEARN deliberately keeps reading separate from the broader selected-child file.
+AFLEARN keeps reading separate from the broader selected-child file.
 
 ```text
 UNICEF fs.sav
@@ -50,7 +38,7 @@ UNICEF fs.sav
 FS/background harmonisation      reading harmonisation
       │                               │
       ▼                               ▼
-mics6_fs_harmonized             mics6_reading_harmonized
+mics6-fs-harmonised             mics6-reading-harmonised
       │                               │
       └──────────────┬────────────────┘
                      ▼
@@ -66,20 +54,7 @@ Script/harmonize-mics-fs-v1.0.R
 Script/harmonize-mics-reading-v1.1.R
 ```
 
-Both read the survey folders in `Data/UNICEF/` and write to `Data/AFLEARN Harmonised Data/`. The FS script produces:
-
-```text
-mics6_fs_harmonized.dta
-mics6_fs_variable_crosswalk.xlsx
-```
-
-The reading script produces:
-
-```text
-mics6_reading_harmonized.dta
-```
-
-## Supported surveys
+Both read the survey folders in `Data/UNICEF/` and write to `Data/AFLEARN Harmonised Data/`. The FS script produces `mics6-fs-harmonised.dta`, `mics6-fs-harmonised.rds` and `mics6_fs_variable_crosswalk.xlsx`. The reading script produces `mics6-reading-harmonised.dta` and `.rds`.
 
 The current scripts recognise these 18 country codes:
 
@@ -90,21 +65,8 @@ SLE STP SWZ TCD TGO TUN ZWE
 
 Tunisia appears in more than one survey year in the current processing system.
 
-A new survey should never simply be added to the supported list and assumed to work. It should first pass the validation process described at the end of this section.
+A new survey should never simply be added to the supported list and assumed to work. It should first pass the validation process described at the end of this chapter.
 
-## Reproducibility principle
+The harmonised file should never be the only record of a coding decision. A substantive decision should appear in at least one of the processing script, the crosswalk, the country notes or the validation record, and ideally in more than one.
 
-The harmonised file should never be the only record of a coding decision.
-
-A substantive decision should appear in at least one of:
-
-```text
-processing script
-crosswalk
-country notes
-validation record
-```
-
-and ideally in more than one.
-
-The purpose of this section is to make those decisions inspectable without forcing every user to read the entire R source code.
+The purpose of this chapter is to make those decisions inspectable without forcing every user to read the entire R source code.

@@ -1,4 +1,4 @@
-# Country-specific issues {#c07-country-issues}
+## Country-specific issues {#c07-country-issues}
 
 MICS6 is highly standardised, but country datasets are not identical.
 
@@ -6,7 +6,7 @@ The AFLEARN harmonisation therefore contains explicit country-specific logic.
 
 This page summarises the issues already identified in the current processing system. The processing scripts and Excel crosswalk remain the authoritative implementation record.
 
-## Reading-specific issues
+### Reading-specific issues
 
 | Survey/country | Issue | AFLEARN treatment |
 |---|---|---|
@@ -23,7 +23,7 @@ This page summarises the issues already identified in the current processing sys
 
 These exceptions are the reason the reading file should be generated from the original UNICEF data rather than by blindly appending similarly named fields.
 
-## FS/background issues
+### FS/background issues
 
 | Survey/country | Issue | AFLEARN treatment |
 |---|---|---|
@@ -37,9 +37,9 @@ These exceptions are the reason the reading file should be generated from the or
 | Malawi | Parent-education raw category meanings differ across mother/father fields | Apply variable-specific education maps |
 | Tunisia 2018 | Child-labour module absent | Harmonised child-labour fields created as missing |
 
-## Variables that retain country-specific meaning
+### Variables that retain country-specific meaning
 
-Even where no special code fix is required, some harmonised variables should **not** be interpreted as common cross-country categories.
+Even where no special code fix is required, some harmonised variables should not be interpreted as common cross-country categories.
 
 These include:
 
@@ -60,7 +60,7 @@ not:
 
 > every numeric category has exactly the same substantive meaning in every country.
 
-## Education-level maps
+### Education-level maps
 
 AFLEARN does harmonise broad education levels into:
 
@@ -87,30 +87,15 @@ Examples include:
 
 Every raw-to-harmonised mapping is written to the `level_map` sheet.
 
-## Survey year matters
+### Survey year matters
 
 Do not assume that one country-specific rule applies forever.
 
-If a country appears in multiple survey years:
-
-```text
-country
-+
-survey year
-```
-
-should be treated as the unit for validating:
-
-- questionnaire wording;
-- variable names;
-- coding;
-- passage languages;
-- education structure; and
-- country-specific repairs.
+If a country appears in multiple survey years, treat `country + survey year` as the unit for validating questionnaire wording, variable names, coding, passage languages, education structure and country-specific repairs.
 
 A new survey round should be reviewed even if the same country was supported previously.
 
-## How to add a new country safely
+### How to add a new country safely
 
 Do not begin by writing a large block of special-case code.
 

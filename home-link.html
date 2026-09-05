@@ -1,3 +1,27 @@
-<p class="guide-home-link">
-  <a href="index.html"><i class="fa fa-arrow-left"></i> Back to guide home</a>
-</p>
+<script>
+(function () {
+  function addHomeLink() {
+    var page = document.querySelector("div.page-inner section") ||
+      document.querySelector("div.page-inner");
+    if (!page || page.querySelector("p.guide-home-link")) return;
+    var p = document.createElement("p");
+    p.className = "guide-home-link";
+    p.innerHTML = '<a href="index.html"><i class="fa fa-arrow-left"></i> Back to guide home</a>';
+    page.insertBefore(p, page.firstChild);
+  }
+
+  function bind() {
+    if (typeof require === "function") {
+      require(["gitbook"], function (gitbook) {
+        gitbook.events.bind("page.change", addHomeLink);
+      });
+    } else if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", addHomeLink);
+    } else {
+      addHomeLink();
+    }
+  }
+
+  bind();
+})();
+</script>

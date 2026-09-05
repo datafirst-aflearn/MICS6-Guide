@@ -15,19 +15,22 @@ The published site has two layers:
 ```text
 MICS6-Guide/
 ├── index.Rmd                  book setup only (packages, knitr options)
-├── 01…07*.Rmd                 the 37 chapters, in seven sections
+├── 01…07*.Rmd                 seven chapters, each with nested sections
 ├── nav-guide.Rmd              landing page -> docs/index.html
 ├── _bookdown.yml              chapter order, output_dir, after_render hook
-├── _output.yml                gitbook format, CSS, TOC logo
+├── _output.yml                gitbook format, CSS, TOC logo, split_by: section
 ├── style.css                  AFLEARN gitbook theme and callout boxes
 ├── home-link.html             "back to guide home" strip on every chapter
 ├── render-site.R              build everything
 ├── R/publish-nav.R            render nav-guide.Rmd as docs/index.html
 ├── files/                     brand mark, DataHub lockup, section icons
 ├── Script/                    user-facing data preparation and analysis scripts
+│   ├── run-it.R               the one script readers run
+│   ├── prepare-mics-fs.R      unpacks the UNICEF download into Data/UNICEF/
+│   ├── harmonize-mics-fs-v1.0.R
+│   └── harmonize-mics-reading-v1.1.R
 ├── Data/                      working data (contents git-ignored)
 │   ├── UNICEF/                one folder per survey, written by prepare-mics-fs.R
-│   ├── IPUMS/                 your IPUMS MICS extracts
 │   └── AFLEARN Harmonised Data/   harmonisation script output
 └── docs/                      rendered site (GitHub Pages source)
 ```
@@ -55,7 +58,7 @@ source("R/publish-nav.R")
 For a single chapter while writing:
 
 ```r
-bookdown::preview_chapter("03a-organise-download.Rmd")
+bookdown::preview_chapter("01b-organise-download.Rmd")
 ```
 
 Chapters that touch microdata are `eval=FALSE`, so the book builds without any
@@ -68,38 +71,37 @@ is not required, because Stata chunks are not evaluated.
 
 ## Working with the data
 
-Put the UNICEF bulk download next to `Script/prepare-mics-fs.R` and source it:
+Readers run one script. They unzip the `Script` folder into a project folder,
+put `MICS_Datasets.zip` beside it, then:
 
 ```r
-source("Script/prepare-mics-fs.R")
+setwd("C:/path/to/MICS project")
+source("Script/run-it.R")
 ```
 
-Sourcing runs the script. It creates `Data/UNICEF/`, `Data/IPUMS/`,
-`Data/AFLEARN Harmonised Data/` and `Script/`, unpacks the nested UNICEF
-archives into one clean folder per survey, and copies itself plus any
-harmonisation scripts it finds into `Script/`. Re-running is safe. It uses base
-R only.
+`run-it.R` sources `prepare-mics-fs.R` and calls `prepare_mics_data()`, which
+creates `Data/UNICEF/` and `Data/AFLEARN Harmonised Data/` and unpacks the
+nested UNICEF archives into one clean folder per survey. It then sources
+`harmonize-mics-fs-v1.0.R` and `harmonize-mics-reading-v1.1.R` from `Script/`
+if they are there, warning and skipping any that are missing. Re-running is
+safe.
 
-The script also works outside this project: run it in any folder containing
-`MICS_Datasets.zip` and it builds the same structure there.
+The working directory must be the project folder holding `Script/`; `run-it.R`
+stops before creating anything if it is not. `Script/` is never created — it
+comes from the download. The unzip step is base R only.
 
 ### Harmonisation scripts
 
-The two AFLEARN harmonisation scripts are referenced throughout Sections 3, 4
-and 7 but are **not yet in this repository**:
-
 | Script | Reads | Writes |
 |---|---|---|
-| `Script/harmonize-mics-fs-v1.0.R` | `Data/UNICEF/` | `Data/AFLEARN Harmonised Data/mics6_fs_harmonized.dta` and the variable crosswalk |
-| `Script/harmonize-mics-reading-v1.1.R` | `Data/UNICEF/` | `Data/AFLEARN Harmonised Data/mics6_reading_harmonized.dta` |
+| `Script/harmonize-mics-fs-v1.0.R` | `Data/UNICEF/` | `Data/AFLEARN Harmonised Data/mics6-fs-harmonised.{dta,rds}` and the variable crosswalk |
+| `Script/harmonize-mics-reading-v1.1.R` | `Data/UNICEF/` | `Data/AFLEARN Harmonised Data/mics6-reading-harmonised.{dta,rds}` |
 
-Drop them into `Script/` and point their input and output paths at those two
-folders. `prepare-mics-fs.R` will move them there automatically if it finds them
-beside the zip.
+`run-it.R` sources them in that order.
 
-Known outstanding change, flagged in the Section 7 notes: `harmonize-mics-fs-v1.0.R`
-retains `fsweight` but not `PSU`, `stratum` or `windex5`. The worked examples
-assume those are added.
+Known outstanding change, flagged in the worked-example notes:
+`harmonize-mics-fs-v1.0.R` retains `fsweight` but not `PSU`, `stratum` or
+`windex5`. The worked examples assume those are added.
 
 ## Publishing
 

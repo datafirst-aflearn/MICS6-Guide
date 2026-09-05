@@ -20,3 +20,12 @@ if (requireNamespace("Statamarkdown", quietly = TRUE)) {
   library(Statamarkdown)
 }
 ```
+
+# Guide home {- .unlisted}
+
+<!--
+Bookdown's split_by: section requires the HTML body to start with a level-1
+or level-2 heading. This unlisted heading satisfies that check. The page it
+produces is named index.html and is then replaced by the navigation landing
+page in R/publish-nav.R.
+-->

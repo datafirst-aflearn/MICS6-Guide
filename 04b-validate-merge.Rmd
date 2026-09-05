@@ -1,0 +1,68 @@
+## Validating the combined file {#c04-validate}
+
+At minimum, check the following after merging AFLEARN reading onto an IPUMS child extract.
+
+### Number of children by survey
+
+```{r eval=FALSE}
+analysis %>%
+  count(SAMPLE)
+```
+
+### Reading status among children aged 7–14
+
+```{r eval=FALSE}
+analysis %>%
+  filter(age >= 7, age <= 14) %>%
+  count(SAMPLE, reading_status)
+```
+
+Use the actual IPUMS age variable selected in your extract.
+
+### Passage language
+
+```{r eval=FALSE}
+analysis %>%
+  count(SAMPLE, passage_language)
+```
+
+For a known multi-passage country such as Malawi, both relevant assessment languages should be represented in the AFLEARN reading data.
+
+### Compare against the original UNICEF processing
+
+For supported surveys, aggregate results from the merged IPUMS + AFLEARN file should reproduce the corresponding results from the AFLEARN/UNICEF child-level analysis file, allowing for any intentional differences in the analysis sample.
+
+### A useful validation exercise for Malawi
+
+The Malawi case is a particularly clear test of whether the merge has worked.
+
+Before replacement, the IPUMS reading data identify only the retained English-passage observations in `FLWORDSATTEMPT`.
+
+After adding the AFLEARN reading file, the analysis should recover the Chichewa assessments as well.
+
+A simple validation table should show, by passage language:
+
+```text
+Malawi
+-----------------------------
+English       ...
+Chichewa      ...
+Both          ...
+```
+
+and should reconcile with the original UNICEF source data. The source counts are in [Reading-variable construction](#c07-reading-construction).
+
+### What if I use only single-passage countries?
+
+If the analysis is restricted entirely to surveys with one reading passage, the specific multi-passage omission described here does not arise.
+
+AFLEARN's reading variables still offer:
+
+- a consistent reading-status variable;
+- harmonised passage metadata;
+- consistent accuracy construction; and
+- the same reading definitions across all supported MICS6 surveys.
+
+Using the AFLEARN reading file for all countries can therefore simplify a project and avoid maintaining different reading workflows for different surveys.
+
+Once the IPUMS and AFLEARN data are combined, the next issue is statistical rather than data management. Continue to [Survey design, weights and standard errors](#c05-survey-design) before calculating population estimates, confidence intervals or regression standard errors.

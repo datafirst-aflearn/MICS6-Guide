@@ -1,25 +1,22 @@
-# Prepare MICS6 SPSS datasets and set up the AFLEARN working folders.
+# Prepare MICS6 SPSS datasets into the AFLEARN working folders.
 #
-# Simplest use -- put this script and MICS_Datasets.zip in the same folder,
-# set that folder as the working directory, then:
+# You normally do not run this file directly -- run Script/run-it.R, which
+# calls it. Sourcing this file only defines the functions.
 #
-#   source("prepare-mics-fs.R")
+# The working directory must be your MICS project folder, the one holding the
+# Script folder you unzipped. This script creates the Data folders and fills in
+# the UNICEF country folders:
 #
-# That works anywhere on the computer (Downloads, Desktop, a USB drive, etc.).
-# The script creates the full working structure and then fills in the UNICEF
-# country folders:
+#   MICS project/
+#     Data/
+#       UNICEF/                    one folder per survey, .sav files and readmes
+#       AFLEARN Harmonised Data/   empty; harmonisation scripts write here
+#     Script/                      supplied by the download; never created here
 #
-#   Data/
-#     UNICEF/                    one folder per survey, .sav files and readmes
-#     IPUMS/                     empty; put IPUMS MICS extracts here
-#     AFLEARN Harmonised Data/   empty; harmonisation scripts write here
-#   Script/                      this script and the harmonisation scripts
-#
-# If you run it from inside the MICS6-Guide project, the same layout is created
-# under the project root. The script also searches for the zip in:
+# The bulk zip is searched for in this order:
 #   1. zip= argument (prepare_mics_data(zip = "..."))
-#   2. the current working directory
-#   3. the project Data/ folder and project root
+#   2. the project folder
+#   3. the project Data/ folder
 #   4. your user Downloads folder
 #
 # Nested *_Datasets/ folders and inner zips are removed. The original bulk
@@ -31,72 +28,24 @@ ZIP_NAME_REGEX <- "(?i)^MICS_Datasets?\\.zip$"
 
 DATA_DIR_NAME <- "Data"
 UNICEF_DIR_NAME <- "UNICEF"
-IPUMS_DIR_NAME <- "IPUMS"
 HARMONISED_DIR_NAME <- "AFLEARN Harmonised Data"
 SCRIPT_DIR_NAME <- "Script"
 
-HARMONISE_SCRIPT_REGEX <- "(?i)^harmoni[sz]e-mics-.*\\.(R|do)$"
-
-find_script_path <- function() {
-  ofile <- NULL
-  n <- sys.nframe()
-  if (n >= 1L) {
-    for (i in seq_len(n)) {
-      if (!is.null(sys.frame(i)$ofile)) {
-        ofile <- sys.frame(i)$ofile
-      }
-    }
-  }
-  if (is.null(ofile) || !nzchar(ofile)) {
-    return(NA_character_)
-  }
-  normalizePath(ofile, winslash = "/", mustWork = FALSE)
-}
-
-is_project_root <- function(dir) {
-  file.exists(file.path(dir, "_bookdown.yml")) ||
-    file.exists(file.path(dir, "index.Rmd")) ||
-    (dir.exists(file.path(dir, DATA_DIR_NAME)) &&
-       dir.exists(file.path(dir, SCRIPT_DIR_NAME)))
-}
-
-walk_for_project_root <- function(start_dir) {
-  if (is.na(start_dir) || !nzchar(start_dir) || !dir.exists(start_dir)) {
-    return(NA_character_)
-  }
-  cur <- normalizePath(start_dir, winslash = "/", mustWork = TRUE)
-  for (i in seq_len(30)) {
-    if (is_project_root(cur)) {
-      return(cur)
-    }
-    parent <- dirname(cur)
-    if (identical(parent, cur)) {
-      break
-    }
-    cur <- parent
-  }
-  NA_character_
-}
-
-find_project_root <- function(prefer_wd = TRUE) {
-  # Prefer an actual guide project if we can find one, but never require it.
-  starts <- c(getwd(), dirname(find_script_path()))
-  for (s in starts) {
-    root <- walk_for_project_root(s)
-    if (!is.na(root)) {
-      return(root)
-    }
-  }
-  # Standalone mode: use the working directory (expected to contain the zip
-  # and/or this script).
-  if (isTRUE(prefer_wd)) {
-    message(
-      "No MICS6-Guide project found nearby; ",
-      "using working directory as output root:\n  ", getwd()
+#' The MICS project folder: the working directory
+#'
+#' The project folder is the one containing the Script folder unzipped from
+#' the AFLEARN download. Requiring Script/ means a wrong working directory
+#' fails immediately instead of building Data/ in the wrong place.
+project_root <- function() {
+  if (!dir.exists(SCRIPT_DIR_NAME)) {
+    stop(
+      "No '", SCRIPT_DIR_NAME, "' folder in the working directory:\n  ", getwd(),
+      "\n\nSet your MICS project folder as the working directory first:\n",
+      "  setwd(\"C:/path/to/MICS project\")",
+      call. = FALSE
     )
-    return(normalizePath(getwd(), winslash = "/", mustWork = TRUE))
   }
-  stop("Could not determine an output root directory.")
+  normalizePath(getwd(), winslash = "/", mustWork = TRUE)
 }
 
 #' Paths of the AFLEARN working folders under a given root
@@ -106,22 +55,20 @@ project_paths <- function(root) {
     root = root,
     data = data_dir,
     unicef = file.path(data_dir, UNICEF_DIR_NAME),
-    ipums = file.path(data_dir, IPUMS_DIR_NAME),
     harmonised = file.path(data_dir, HARMONISED_DIR_NAME),
     script = file.path(root, SCRIPT_DIR_NAME)
   )
 }
 
-#' Create Data/UNICEF, Data/IPUMS, Data/AFLEARN Harmonised Data and Script/
+#' Create Data/, Data/UNICEF and Data/AFLEARN Harmonised Data
 #'
+#' Script/ is supplied by the AFLEARN download, so it is never created here.
 #' Safe to call repeatedly: existing folders are left untouched.
 ensure_project_dirs <- function(paths) {
   wanted <- c(
     paths$data,
     paths$unicef,
-    paths$ipums,
-    paths$harmonised,
-    paths$script
+    paths$harmonised
   )
   created <- character()
   for (d in wanted) {
@@ -180,9 +127,8 @@ resolve_bulk_zip <- function(paths, zip = NULL) {
   }
 
   search_dirs <- unique(c(
-    getwd(),
-    paths$data,
     paths$root,
+    paths$data,
     user_downloads_dir()
   ))
   search_dirs <- search_dirs[!is.na(search_dirs) & nzchar(search_dirs)]
@@ -313,8 +259,8 @@ resolve_unicef_root <- function(paths, zip = NULL) {
 
   stop(
     "Could not find MICS_Datasets.zip (or MICS_Dataset.zip).\n",
-    "Put the bulk download in your working directory, Downloads, or the\n",
-    "project Data/ folder, then re-run -- or pass the path explicitly:\n",
+    "Put the bulk download in your MICS project folder, its Data/ folder,\n",
+    "or your Downloads folder, then re-run -- or pass the path explicitly:\n",
     "  prepare_mics_data(zip = \"C:/path/to/MICS_Datasets.zip\")"
   )
 }
@@ -345,68 +291,20 @@ clean_old_flat_fs <- function(data_dir) {
   invisible(NULL)
 }
 
-#' Put this script, and any harmonisation scripts found nearby, into Script/
-collect_scripts <- function(paths, zip_dir = NA_character_) {
-  copied <- character()
-
-  self <- find_script_path()
-  if (!is.na(self) && file.exists(self)) {
-    if (!identical(
-      normalizePath(dirname(self), winslash = "/", mustWork = FALSE),
-      normalizePath(paths$script, winslash = "/", mustWork = FALSE)
-    )) {
-      dest <- file.path(paths$script, basename(self))
-      if (file.copy(self, dest, overwrite = TRUE)) {
-        copied <- c(copied, basename(self))
-      }
-    }
-  }
-
-  search_dirs <- unique(c(
-    if (!is.na(self)) dirname(self) else NULL,
-    getwd(),
-    zip_dir,
-    paths$root,
-    paths$data
-  ))
-  search_dirs <- search_dirs[!is.na(search_dirs) & nzchar(search_dirs) &
-                               dir.exists(search_dirs)]
-
-  for (d in search_dirs) {
-    if (identical(
-      normalizePath(d, winslash = "/", mustWork = FALSE),
-      normalizePath(paths$script, winslash = "/", mustWork = FALSE)
-    )) {
-      next
-    }
-    hits <- list.files(d, full.names = TRUE)
-    hits <- hits[grepl(HARMONISE_SCRIPT_REGEX, basename(hits), perl = TRUE)]
-    hits <- hits[file.info(hits)$isdir %in% FALSE]
-    for (h in hits) {
-      dest <- file.path(paths$script, basename(h))
-      if (!file.exists(dest) && file.copy(h, dest, overwrite = FALSE)) {
-        copied <- c(copied, basename(h))
-      }
-    }
-  }
-
-  unique(copied)
-}
-
 #' Prepare MICS survey SPSS files and the AFLEARN working folders
 #'
-#' Creates Data/UNICEF, Data/IPUMS, Data/AFLEARN Harmonised Data and Script/,
-#' then extracts the UNICEF bulk download into Data/UNICEF/.
+#' Creates Data/UNICEF and Data/AFLEARN Harmonised Data, then extracts the
+#' UNICEF bulk download into Data/UNICEF/. Script/ comes from the AFLEARN
+#' download and is left as it is.
 #'
 #' @param zip Optional path to MICS_Datasets.zip. If NULL, the zip is
-#'   searched for in getwd(), the project Data/ folder, project root, and
-#'   the user Downloads folder.
-#' @param root Output root (guide project or any folder). Detected
-#'   automatically: MICS6-Guide project if present, otherwise getwd().
+#'   searched for in the project folder, its Data/ folder, and the user
+#'   Downloads folder.
+#' @param root The MICS project folder. Defaults to the working directory.
 #' @param remove_zip If TRUE, delete the bulk zip after a successful run.
 #'   Default FALSE so a zip in Downloads is left alone.
 prepare_mics_data <- function(zip = NULL,
-                              root = find_project_root(),
+                              root = project_root(),
                               remove_zip = FALSE) {
   paths <- project_paths(root)
   ensure_project_dirs(paths)
@@ -471,9 +369,6 @@ prepare_mics_data <- function(zip = NULL,
     )
   }
 
-  zip_dir <- if (!is.na(bulk_zip)) dirname(bulk_zip) else NA_character_
-  collected <- collect_scripts(paths, zip_dir = zip_dir)
-
   if (isTRUE(remove_zip) && !is.na(bulk_zip) && file.exists(bulk_zip)) {
     unlink(bulk_zip, force = TRUE)
     message("Removed ", bulk_zip)
@@ -491,25 +386,15 @@ prepare_mics_data <- function(zip = NULL,
       message("    - ", s)
     }
   }
-  if (length(collected) > 0L) {
-    message("  Scripts copied into Script/:")
-    for (s in collected) {
-      message("    - ", s)
-    }
-  }
   message("")
   message("Working folders:")
   message("  UNICEF country data:  ", paths$unicef)
-  message("  IPUMS extracts:       ", paths$ipums)
   message("  Harmonised output:    ", paths$harmonised)
   message("  Scripts:              ", paths$script)
 
   invisible(list(
     results = results,
     skipped = skipped,
-    scripts = collected,
     paths = paths
   ))
 }
-
-prepare_mics_data()

@@ -1,14 +1,10 @@
-# FS harmonisation methods {#c07-fs-harmonisation}
+## FS harmonisation methods {#c07-fs-harmonisation}
 
 The FS harmonisation creates one child-level multi-country dataset from the original UNICEF MICS6 `fs.sav` files.
 
-The current script is:
+The current script is `harmonize-mics-fs-v1.0.R`.
 
-```text
-harmonize-mics-fs-v1.0.R
-```
-
-## Pipeline
+### Pipeline
 
 For each supported survey, the script:
 
@@ -49,13 +45,9 @@ The current thematic blocks are:
 
 Reading item batteries are intentionally excluded and handled by the separate reading script.
 
-## Identifiers
+### Identifiers
 
-Within each survey, the FS child is identified by:
-
-```text
-HH1 + HH2 + LN
-```
+Within each survey, the FS child is identified by `HH1 + HH2 + LN`.
 
 The script also creates:
 
@@ -67,15 +59,9 @@ linech  = LN
 
 to facilitate links to IPUMS and to the separate reading file.
 
-Before appending a survey, the processing should verify that:
+Before appending a survey, the processing should verify that `HH1 + HH2 + LN` uniquely identifies each selected-child record.
 
-```text
-HH1 + HH2 + LN
-```
-
-uniquely identifies each selected-child record.
-
-## Geography
+### Geography
 
 The harmonised fields include:
 
@@ -85,11 +71,11 @@ The harmonised fields include:
 | `region` | `HH7` | First administrative region |
 | `n_children_5_17` | `HH52` | Children aged 5–17 in household |
 
-`region` retains **country-specific codes**. A value of `1` in two countries does not imply the same type of region.
+`region` retains country-specific codes. A value of `1` in two countries does not imply the same type of region.
 
 Do not pool `region` codes without building a separate cross-country geographic classification.
 
-## Survey-design variables
+### Survey-design variables
 
 The current script retains:
 
@@ -98,18 +84,11 @@ fsweight
 fshweight
 ```
 
-Before the revised guide is published, it should also retain:
-
-```text
-PSU
-stratum
-```
-
-because these are needed for the survey-design workflow in Sections 5 and 6.
+Before the revised guide is published, it should also retain `PSU` and `stratum`, because these are needed for the survey-design workflow in [Survey design, weights and standard errors](#c05-survey-design) and [Worked examples](#c06-worked-examples).
 
 No transformation is required: these should be preserved from the source data and documented in the crosswalk.
 
-## Interview timing
+### Interview timing
 
 The harmonised FS file retains:
 
@@ -127,25 +106,13 @@ These are renamed from the standard FS interview fields.
 
 AFLEARN does not currently create a single derived interview date or interview duration.
 
-The `interview_month` variable is used in the advanced Section 6 example on timing within the school year.
+The `interview_month` variable is used in the advanced example on [Timing within the school year](#c06-school-timing).
 
-## Parent education
+### Parent education
 
 Mother and father education illustrate why some harmonisation requires more than renaming.
 
-The raw country-specific variables are retained:
-
-```text
-mother_edu
-father_edu
-```
-
-and common broad education levels are added:
-
-```text
-mother_edu_h
-father_edu_h
-```
+The raw country-specific variables are retained as `mother_edu` and `father_edu`, and common broad education levels are added as `mother_edu_h` and `father_edu_h`.
 
 The harmonised level codes are:
 
@@ -162,7 +129,7 @@ The harmonised level codes are:
 
 The country-specific mappings are stored in the processing script and written to the `level_map` sheet of the Excel crosswalk.
 
-### Father's education
+#### Father's education
 
 Father education is not consistently available directly in `fs.sav`.
 
@@ -170,17 +137,17 @@ The script uses the household-list file (`hl.sav`) and links the relevant househ
 
 This is a good example of why the output should be treated as a constructed research dataset rather than a simple renamed copy of `fs.sav`.
 
-## School type
+### School type
 
 `school_type` is retained using the country source coding.
 
-It is **not fully harmonised across countries**.
+It is not fully harmonised across countries.
 
 For example, some surveys use a standard public/religious/private/community classification, while others use a different institutional taxonomy.
 
 Use the country notes before pooling this variable.
 
-## Child schooling
+### Child schooling
 
 The main harmonised variables are:
 
@@ -202,21 +169,11 @@ previous_grade
 
 The raw level variables retain country coding.
 
-AFLEARN additionally constructs:
+AFLEARN additionally constructs `highest_level_h`, `current_level_h` and `previous_level_h` using the common broad education-level classification above.
 
-```text
-highest_level_h
-current_level_h
-previous_level_h
-```
+#### Grade is deliberately not fully harmonised
 
-using the common broad education-level classification above.
-
-### Grade is deliberately not fully harmonised
-
-`current_grade` remains the year **within the education level**.
-
-For example:
+`current_grade` remains the year within the education level.
 
 ```text
 current_level_h = primary
@@ -236,7 +193,7 @@ These are different years in the education system.
 
 See [Why current_grade is not the child's grade](#c07-current-grade).
 
-## Child labour, parental involvement, functioning and discipline
+### Child labour, parental involvement, functioning and discipline
 
 For these themes the current harmonisation is intentionally conservative.
 
@@ -249,7 +206,7 @@ applies common labels where justified
 does not manufacture derived indicators
 ```
 
-The script therefore does **not** automatically construct:
+The script therefore does not automatically construct:
 
 - child-labour prevalence;
 - violent-discipline indicators;
@@ -258,7 +215,7 @@ The script therefore does **not** automatically construct:
 
 Researchers who need those measures should derive them transparently from the harmonised items and the relevant indicator definitions.
 
-## Numeracy
+### Numeracy
 
 The FS harmonisation retains:
 
@@ -281,9 +238,9 @@ fl_child_result
 
 It does not currently derive a foundational-numeracy indicator.
 
-Section 6 provides a provisional total-score workflow, but any official binary indicator should be validated against published MICS tabulations before being added to the harmonised product.
+[Prepare the analysis data](#c06-prepare-analysis) provides a provisional total-score workflow, but any official binary indicator should be validated against published MICS tabulations before being added to the harmonised product.
 
-## What the FS harmonisation deliberately does not do
+### What the FS harmonisation deliberately does not do
 
 A common variable name should not imply more comparability than the source data support.
 

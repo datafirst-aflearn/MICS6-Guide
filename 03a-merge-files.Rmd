@@ -1,0 +1,211 @@
+## Merging MICS6 files within a country {#c03-merge}
+
+MICS data are split across files because the files have different units of observation. You will often need to add information from another file to the selected-child (`fs`) data.
+
+::: {.alternativebox-solo}
+**Decide what one row of the final dataset represents before you merge anything.**
+:::
+
+For foundational-learning research, one row will usually represent the selected child in `fs`. Start with `fs` and add the variables you need.
+
+UNICEF's MICS6 statistical analysis manual includes guidance on merging MICS datasets and describes the identifiers used across questionnaire files. See the [MICS6 Manual for Statistical Data Analysis](https://data.unicef.org/wp-content/uploads/2019/07/MICS6-manual-for-stats-data-analysis-English_2020_v2.pdf).
+
+The conceptual keys are in [Files, units of observation and identifiers](#c02-files). The three common links are:
+
+1. Household information onto the selected child: `HH1 + HH2`.
+2. The selected child's own household-list record: `fs` uses `HH1 + HH2 + LN`; `hl` uses `HH1 + HH2 + HL1`.
+3. Another household member, such as the mother or caretaker recorded in `FS4`: `HH1 + HH2` plus that person's line number, not the child's own `LN`.
+
+### Example 1: add household variables to `fs`
+
+Suppose we want to add household variables from `hh.sav`.
+
+#### R
+
+```{r eval=FALSE}
+library(haven)
+library(dplyr)
+
+fs <- read_sav("Data/UNICEF/COUNTRY_SURVEY/fs.sav")
+hh <- read_sav("Data/UNICEF/COUNTRY_SURVEY/hh.sav")
+
+hh %>%
+  count(HH1, HH2) %>%
+  filter(n > 1)
+
+hh_keep <- hh %>%
+  select(HH1, HH2, variable_1, variable_2)
+
+fs_merged <- fs %>%
+  left_join(
+    hh_keep,
+    by = c("HH1", "HH2"),
+    relationship = "many-to-one"
+  )
+```
+
+Replace `variable_1` and `variable_2` with the variables required for the analysis.
+
+`relationship = "many-to-one"` makes the expectation explicit: many child records may refer to a household, but there should be only one matching household record for each `HH1 + HH2` key.
+
+#### Stata
+
+```stata
+use "Data/UNICEF/COUNTRY_SURVEY/fs.dta", clear
+
+merge m:1 HH1 HH2 using ///
+    "Data/UNICEF/COUNTRY_SURVEY/hh.dta", ///
+    keepusing(variable_1 variable_2)
+
+tab _merge
+```
+
+If you are working directly with UNICEF's `.sav` files in Stata, import the SPSS files first and save temporary `.dta` versions.
+
+### Example 2: add the child's own `hl` variables
+
+The line-number variable has a different name in the two files:
+
+```text
+fs: LN
+hl: HL1
+```
+
+#### R
+
+```{r eval=FALSE}
+library(haven)
+library(dplyr)
+
+fs <- read_sav("Data/UNICEF/COUNTRY_SURVEY/fs.sav")
+hl <- read_sav("Data/UNICEF/COUNTRY_SURVEY/hl.sav")
+
+hl %>%
+  count(HH1, HH2, HL1) %>%
+  filter(n > 1)
+
+hl_child <- hl %>%
+  select(HH1, HH2, HL1, variable_1, variable_2)
+
+fs_merged <- fs %>%
+  left_join(
+    hl_child,
+    by = c("HH1", "HH2", "LN" = "HL1"),
+    relationship = "one-to-one"
+  )
+```
+
+Because there is only one selected child per household in `fs`, the child-level link should be one-to-one.
+
+#### Stata
+
+Rename the line number in the using file:
+
+```stata
+import spss using ///
+    "Data/UNICEF/COUNTRY_SURVEY/hl.sav", clear
+
+keep HH1 HH2 HL1 variable_1 variable_2
+rename HL1 LN
+
+isid HH1 HH2 LN
+
+tempfile hl_child
+save `hl_child'
+
+import spss using ///
+    "Data/UNICEF/COUNTRY_SURVEY/fs.sav", clear
+
+isid HH1 HH2 LN
+
+merge 1:1 HH1 HH2 LN using `hl_child'
+
+tab _merge
+```
+
+### Always validate a merge
+
+A merge command that completes without an error is not evidence that the merge is correct.
+
+Before merging, ask:
+
+1. What does one row represent in each file?
+2. Should the key be unique in one file or both?
+3. Are the line numbers identifying the same person?
+4. How many rows should the analysis dataset have after the merge?
+
+Then inspect the result.
+
+#### R checks
+
+```{r eval=FALSE}
+nrow(fs)
+nrow(fs_merged)
+
+fs_merged %>%
+  count(HH1, HH2, LN) %>%
+  filter(n > 1)
+```
+
+For important merges, use an indicator to identify unmatched observations rather than silently accepting them.
+
+```{r eval=FALSE}
+fs_check <- fs %>%
+  left_join(
+    hl %>%
+      select(HH1, HH2, HL1, variable_1),
+    by = c("HH1", "HH2", "LN" = "HL1"),
+    relationship = "one-to-one",
+    unmatched = "drop"
+  )
+```
+
+For production work, count unmatched records rather than simply dropping them.
+
+#### Stata checks
+
+Stata creates `_merge` automatically:
+
+```stata
+tab _merge
+```
+
+Interpret:
+
+```text
+1 = record only in master
+2 = record only in using file
+3 = matched
+```
+
+Do not automatically write:
+
+```stata
+drop if _merge != 3
+```
+
+until you understand why observations did not match.
+
+### A merge can change neither the unit of analysis nor the weight
+
+If the dataset still contains one row per selected `fs` child after adding household variables, the analysis population remains the selected-child population.
+
+```text
+fs outcome + hh wealth variable
+          │
+          ▼
+one row per selected child
+          │
+          ▼
+use fsweight
+```
+
+You do not switch to `hhweight` because one covariate came from the household file. See [Survey design, weights and standard errors](#c05-survey-design).
+
+### AFLEARN scripts already perform some required links
+
+You do not necessarily need to perform every merge manually.
+
+AFLEARN's cross-country `fs` harmonisation script reads `hl.sav` where needed to add selected-child household-list variables such as father education and school type. The script checks `HH1`, `HH2` and line-number identifiers as part of that workflow.
+
+The examples above are included so that you understand the structure and can add variables that are not already covered by AFLEARN's harmonised file.

@@ -1,16 +1,12 @@
-# Reading-variable construction {#c07-reading-construction}
+## Reading-variable construction {#c07-reading-construction}
 
 The reading harmonisation is the most technically involved part of the AFLEARN MICS6 workflow.
 
-The current script is:
+The current script is `harmonize-mics-reading-v1.1.R`.
 
-```text
-harmonize-mics-reading-v1.1.R
-```
+Its purpose is to transform survey-specific reading variables into a consistent child-level file while retaining the information required to understand which language and passage each child was assessed in.
 
-Its purpose is to transform survey-specific reading variables into a consistent child-level file while retaining the information required to understand **which language and passage each child was assessed in**.
-
-## Pipeline
+### Pipeline
 
 For each survey:
 
@@ -40,7 +36,7 @@ classify reading-status pathway
 retain merge identifiers
 ```
 
-## Reading score
+### Reading score
 
 For a passage:
 
@@ -62,7 +58,7 @@ or:
 
 The same structure is retained separately for additional passages where relevant.
 
-## Passage language
+### Passage language
 
 For single-language surveys, the passage language can be assigned directly.
 
@@ -74,9 +70,9 @@ For multilingual surveys, the language often needs to be inferred using survey-s
 - passage attempted; and
 - country questionnaire routing.
 
-This is why `passage_language` is a **constructed variable**, not merely a renamed questionnaire field.
+This is why `passage_language` is a constructed variable, not merely a renamed questionnaire field.
 
-## Passage length
+### Passage length
 
 Reading accuracy requires the number of words in the passage.
 
@@ -89,15 +85,9 @@ L_l =
 
 where \(L_l\) is the inferred length of passage language \(l\).
 
-The resulting variable is:
+The resulting variable is `passage_length`, with equivalent fields for additional passages.
 
-```text
-passage_length
-```
-
-with equivalent fields for additional passages.
-
-### Validation requirement
+#### Validation requirement
 
 A data-derived passage length should always be checked.
 
@@ -114,7 +104,7 @@ published survey information
 
 A derived accuracy greater than 1 is an immediate warning that passage length or source counts require investigation.
 
-## Reading accuracy
+### Reading accuracy
 
 AFLEARN defines:
 
@@ -125,47 +115,19 @@ AFLEARN defines:
 {\text{passage length}}
 \]
 
-The output variable is:
+The output variable is `reading_accuracy`, with passage-specific equivalents where applicable.
 
-```text
-reading_accuracy
-```
-
-with passage-specific equivalents where applicable.
-
-## Comprehension
+### Comprehension
 
 The standard reading assessment contains five comprehension questions.
 
-AFLEARN retains:
-
-```text
-read_comp_1
-read_comp_2
-read_comp_3
-read_comp_4
-read_comp_5
-```
-
-and constructs:
-
-```text
-read_comp_score
-```
-
-as the number answered correctly, conditional on the relevant comprehension sequence having been administered.
+AFLEARN retains `read_comp_1` through `read_comp_5` and constructs `read_comp_score` as the number answered correctly, conditional on the relevant comprehension sequence having been administered.
 
 Country-specific source-variable mappings are handled before the score is constructed.
 
-## Foundational-reading classification
+### Foundational-reading classification
 
-The current AFLEARN construction combines:
-
-```text
-reading accuracy
-+
-comprehension
-```
+The current AFLEARN construction combines reading accuracy and comprehension.
 
 The implementation uses the passage-specific integer word cutoff that reproduces the classifications in published MICS outputs.
 
@@ -181,11 +143,11 @@ reading_skills =
   comprehension criterion met
 ```
 
-This rounding convention is therefore **intentional**, not a numerical approximation introduced by the guide.
+This rounding convention is therefore intentional, not a numerical approximation introduced by the guide.
 
 Whenever the reading script is changed, the resulting classifications should again be checked against published country results.
 
-## Multiple passages
+### Multiple passages
 
 A second or third passage is not treated as generic missingness.
 
@@ -201,32 +163,39 @@ For children with more than one valid attempt, these represent the best observed
 
 Researchers should state explicitly when these `max_*` outcomes are used.
 
-## Malawi
+### Malawi
 
-Malawi requires special treatment because English and Chichewa are stored as separate passages.
-
-Some children attempt only Chichewa.
+Malawi requires special treatment because English and Chichewa are stored as separate passages. Some children attempt only Chichewa.
 
 The script therefore moves Chichewa-only attempts into the primary analysis slots while retaining the passage-language information.
 
 This ensures that the combined reading file contains the complete assessment rather than treating the English passage as if it were the entire Malawi reading sample.
 
-## Practice items
+The Malawi MICS 2019–20 questionnaire contains separate English and Chichewa reading pathways, including separate results variables. UNICEF's Malawi reporting also states that the foundational reading assessment was conducted in English and Chichewa.
+
+| Malawi MICS 2019–20 | Number of children |
+|---|---:|
+| Have `FLWORDSATTEMPT` in an IPUMS extract (English passage) | 1,720 |
+| Attempted the Chichewa passage in the original UNICEF data | 3,970 |
+| Attempted both passages | 130 |
+
+The original UNICEF source data confirm 3,970 valid observations for `FLB20A`, the number of words attempted in the Chichewa passage. The Malawi questionnaire documentation also shows separate `FL20` and `FL20B` reading-results fields, with `FL20B` corresponding to the Chichewa passage.
+
+Most children who attempted the Chichewa passage have no corresponding value in the IPUMS `FLWORDSATTEMPT` variable. An analysis that treated the IPUMS variable as the Malawi reading sample would therefore omit the Chichewa assessment data.
+
+This is why AFLEARN reconstructs reading from the original UNICEF files rather than from the IPUMS reading variables. See [Getting data from IPUMS MICS](#c01-ipums).
+
+### Practice items
 
 The reading pathway includes a practice sequence.
 
-AFLEARN retains the practice items and constructs:
-
-```text
-practice_outcome
-fail_practice
-```
+AFLEARN retains the practice items and constructs `practice_outcome` and `fail_practice`.
 
 These are important because children who fail the practice sequence may never reach the main passage.
 
 A missing main-passage score is therefore not sufficient to distinguish low performance from other assessment pathways.
 
-## `reading_status`
+### `reading_status`
 
 AFLEARN constructs:
 
@@ -249,7 +218,7 @@ Later observed outcomes overwrite earlier provisional categories where appropria
 
 The purpose is not just convenience. `reading_status` makes the denominator and assessment pathway visible to analysts.
 
-## Output variables
+### Output variables
 
 The research-ready reading file contains, where applicable:
 

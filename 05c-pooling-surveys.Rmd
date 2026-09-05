@@ -1,15 +1,15 @@
-# Combining MICS6 surveys {#c05-pooling}
+## Combining MICS6 surveys {#c05-pooling}
 
 Multi-country MICS analysis introduces two separate questions:
 
-1. **How should the survey design be represented technically?**
-2. **What population does a pooled estimate represent?**
+1. How should the survey design be represented technically?
+2. What population does a pooled estimate represent?
 
 These should not be confused.
 
-Making PSU identifiers unique across countries solves a **variance-estimation problem**. It does not, by itself, make a pooled weighted mean a meaningful regional estimate.
+Making PSU identifiers unique across countries solves a variance-estimation problem. It does not, by itself, make a pooled weighted mean a meaningful regional estimate.
 
-## Problem 1: PSU and stratum numbers repeat across surveys
+### Problem 1: PSU and stratum numbers repeat across surveys
 
 Suppose two surveys both contain:
 
@@ -24,7 +24,7 @@ If surveys are appended without changing these identifiers, survey software can 
 
 The solution is to create identifiers that are unique to each survey.
 
-## Create a survey identifier
+### Create a survey identifier
 
 For AFLEARN's UNICEF-based harmonised data, a survey identifier can be based on:
 
@@ -36,7 +36,7 @@ For IPUMS data, use the IPUMS sample identifier such as `SAMPLE`.
 
 Then create survey-specific PSU and stratum variables.
 
-## R
+### R
 
 ```{r eval=FALSE}
 library(dplyr)
@@ -75,7 +75,7 @@ des_pool <- svydesign(
 )
 ```
 
-## Stata
+### Stata
 
 ```stata
 egen survey_id = group(country_iso3 year)
@@ -95,17 +95,17 @@ This tells the software correctly that a PSU in Malawi is not the same PSU as on
 Doing only the PSU is not enough if stratum codes also repeat across surveys.
 :::
 
-## Estimating each country separately
+### Estimating each country separately
 
 If the objective is:
 
 > What is the mean numeracy score in each country?
 
-then you are estimating **country-specific statistics**, not one pooled population parameter.
+then you are estimating country-specific statistics, not one pooled population parameter.
 
 One transparent approach is to retain the combined design and estimate by country/survey.
 
-### R with `srvyr`
+#### R with `srvyr`
 
 ```{r eval=FALSE}
 des_pool %>%
@@ -119,7 +119,7 @@ des_pool %>%
   )
 ```
 
-### Stata
+#### Stata
 
 ```stata
 svy: mean pct_total_math, over(country_iso3)
@@ -129,7 +129,7 @@ or run country-specific estimates while retaining the correct survey design.
 
 For cross-country figures and tables, this is often exactly what you want.
 
-## Problem 2: what does a pooled mean mean?
+### Problem 2: what does a pooled mean mean?
 
 Suppose instead you calculate:
 
@@ -146,25 +146,19 @@ There are several possibilities:
 - the average child represented by the collection of normalised survey samples; or
 - some externally defined regional population.
 
-These are **different estimands** and require different weighting choices.
+These are different estimands and require different weighting choices.
 
-## MICS country weights do not automatically create a population-weighted regional estimate
+### MICS country weights do not automatically create a population-weighted regional estimate
 
 MICS sample weights are constructed for inference within each survey and are generally normalised within the survey.
 
-If you simply append countries and use the released `fsweight` values:
+If you simply append countries and use the released `fsweight` values, the relative contribution of one country versus another is driven partly by survey sample sizes and each survey's weight normalisation.
 
-```text
-pooled mean using fsweight
-```
-
-the relative contribution of one country versus another is driven partly by survey sample sizes and each survey's weight normalisation.
-
-It should **not automatically be interpreted as the proportion of all children across those countries**.
+It should not automatically be interpreted as the proportion of all children across those countries.
 
 For a true population-weighted regional estimate, you would need external population information appropriate to the target population and survey reference periods, and construct weights accordingly.
 
-## Equal-country averages are another option
+### Equal-country averages are another option
 
 Sometimes the research question is:
 
@@ -175,11 +169,11 @@ A simple way is:
 1. estimate the statistic separately within each country using the correct MICS design;
 2. combine the country estimates with equal country weights.
 
-That estimand is an **average of country estimates**, not an estimate for the pooled child population.
+That estimand is an average of country estimates, not an estimate for the pooled child population.
 
 It should be labelled accordingly.
 
-## Regression across countries
+### Regression across countries
 
 The same conceptual issue applies to pooled regressions.
 
@@ -199,31 +193,25 @@ There is no single automatic "MICS pooled weight" that answers every multi-count
 :::
 
 ::: {.alternativebox}
-`psu_pool` and `stratum_pool` tell the software **how the observations were sampled**.
+`psu_pool` and `stratum_pool` tell the software how the observations were sampled.
 
-Your treatment of country weights tells the analysis **what pooled population or average you are trying to represent**.
+Your treatment of country weights tells the analysis what pooled population or average you are trying to represent.
 :::
 
-## Repeated surveys from the same country
+### Repeated surveys from the same country
 
-If you include two MICS6 surveys from the same country, such as different years or samples, the identifiers must still be **survey-specific**, not merely country-specific.
+If you include two MICS6 surveys from the same country, such as different years or samples, the identifiers must still be survey-specific, not merely country-specific.
 
-Use:
+Use `country + year/sample` rather than country alone when creating pooled PSU and stratum identifiers.
 
-```text
-country + year/sample
-```
-
-rather than country alone when creating pooled PSU and stratum identifiers.
-
-## Recommended workflow for comparative AFLEARN analyses
+### Recommended workflow for comparative AFLEARN analyses
 
 For most descriptive comparisons in this guide:
 
 1. retain the released `fsweight`;
 2. make PSU and stratum identifiers unique by survey;
 3. define the combined survey design;
-4. estimate statistics **separately by country/survey**; and
+4. estimate statistics separately by country/survey; and
 5. plot or compare those country estimates.
 
 Only create a single pooled regional statistic when the estimand and the required between-country weighting have been explicitly defined.

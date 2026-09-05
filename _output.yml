@@ -1,7 +1,8 @@
 bookdown::gitbook:
   css: style.css
+  split_by: section
   includes:
-    before_body: home-link.html
+    after_body: home-link.html
   config:
     toc:
       before: |

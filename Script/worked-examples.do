@@ -10,10 +10,10 @@ set more off
 * 1. READ AND MERGE
 * -----------------------------------------------------
 
-use "Data/AFLEARN Harmonised Data/mics6_fs_harmonized.dta", clear
+use "Data/AFLEARN Harmonised Data/mics6-fs-harmonised.dta", clear
 
 merge 1:1 country_iso3 year HH1 HH2 LN using ///
-    "Data/AFLEARN Harmonised Data/mics6_reading_harmonized.dta"
+    "Data/AFLEARN Harmonised Data/mics6-reading-harmonised.dta"
 
 tab _merge
 drop _merge

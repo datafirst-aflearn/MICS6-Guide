@@ -1,20 +1,20 @@
-# Survey-design checklist {#c05-checklist}
+## Survey-design checklist {#c05-checklist}
 
 Before reporting a MICS6 estimate, check the following.
 
-## Analysis population
+### Analysis population
 
 - [ ] I know what one row in my analysis dataset represents.
 - [ ] For FLS analysis, my observations are selected children from `fs`.
 - [ ] If I merged variables from `hh` or `hl`, I have not changed the weight merely because the covariate came from another file.
 
-## Weight
+### Weight
 
 - [ ] I am using `fsweight` for selected-child/FLS analysis.
 - [ ] I am not using `fshweight` as a substitute for the selected-child weight.
 - [ ] I understand that normalised survey weights are not automatically population-expansion weights for estimating national counts.
 
-## Survey design
+### Survey design
 
 - [ ] I have specified the PSU.
 - [ ] I have specified the sampling stratum.
@@ -29,14 +29,14 @@ PSU      = PSU
 stratum  = stratum
 ```
 
-## Subpopulations
+### Subpopulations
 
 - [ ] I defined the survey design before restricting to my analytical subpopulation.
 - [ ] In R, I subset/filter the survey design object.
 - [ ] In Stata, I use `subpop()` where appropriate.
 - [ ] I checked whether small domains leave too few PSUs for precise estimation.
 
-## Multiple surveys
+### Multiple surveys
 
 If I appended countries or survey years:
 
@@ -46,12 +46,12 @@ If I appended countries or survey years:
 - [ ] I have not interpreted a simple pooled `fsweight` estimate as a population-weighted regional statistic without defining the estimand.
 - [ ] If I report an average across countries, I state how countries were weighted.
 
-## Reading
+### Reading
 
 - [ ] I checked `reading_status` before defining my reading analysis sample.
 - [ ] For multi-passage countries, I use the AFLEARN reading data rather than incomplete IPUMS reading variables.
 
-## Reporting
+### Reporting
 
 - [ ] I report confidence intervals or standard errors with the point estimates.
 - [ ] I retain the unweighted analytic N.
@@ -61,4 +61,4 @@ If I appended countries or survey years:
 **If these boxes are checked, the analysis is much less likely to produce a precise-looking but incorrectly estimated MICS result.**
 :::
 
-The worked examples in Section 6 apply these principles in R and Stata.
+The worked examples in [Worked examples](#c06-worked-examples) apply these principles in R and Stata.

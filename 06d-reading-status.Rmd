@@ -1,14 +1,12 @@
-# Worked example 3: Why is the reading outcome missing? {#c06-reading-status}
+## Why is the reading outcome missing? {#c06-reading-status}
 
-## Research question
+### Research question
 
 > When a child has no reading score, what happened in the assessment?
 
 A missing reading score does not have one meaning.
 
 AFLEARN's `reading_status` reconstructs the reading pathway.
-
-The current coding is:
 
 | Code | Meaning |
 |---:|---|
@@ -25,9 +23,9 @@ The current coding is:
 
 Codes 7 and 8 both indicate that the child reached the passage; code 8 additionally identifies children meeting the foundational-reading criterion.
 
-## Describe the pathway among ages 7–14
+### Describe the pathway among ages 7–14
 
-### R
+#### R
 
 ```{r eval=FALSE}
 reading_status_tab <- des %>%
@@ -42,14 +40,14 @@ reading_status_tab <- des %>%
   )
 ```
 
-### Stata
+#### Stata
 
 ```stata
 svy, subpop(if inrange(age,7,14)): ///
     proportion reading_status, over(country_iso3)
 ```
 
-## A simpler attempted/not-attempted distinction
+### A simpler attempted/not-attempted distinction
 
 ```{r eval=FALSE}
 d <- d %>%
@@ -81,19 +79,11 @@ des %>%
   )
 ```
 
-## Why not code all non-attempts as zero reading skill?
+### Why not code all non-attempts as zero reading skill?
 
 Because these categories describe different processes.
 
-For example:
-
-```text
-language mismatch
-```
-
-means the survey could not offer an appropriate reading passage under the questionnaire routing.
-
-That is not direct evidence that the child cannot read.
+Language mismatch means the survey could not offer an appropriate reading passage under the questionnaire routing. That is not direct evidence that the child cannot read.
 
 Similarly, lack of caregiver consent is a nonresponse event, not an observed low score.
 
@@ -101,7 +91,7 @@ By contrast, failing the practice sequence is much closer to evidence about the 
 
 The appropriate treatment depends on the research question.
 
-## Recommended reporting
+### Recommended reporting
 
 Whenever reading results exclude a substantial share of age-eligible children, report:
 
@@ -113,7 +103,7 @@ alongside the learning outcome.
 
 This makes assessment coverage visible rather than allowing it to disappear into missing values.
 
-## Suggested figure
+### Suggested figure
 
 A stacked bar by country:
 
@@ -127,6 +117,6 @@ other
 
 Keep categories substantively meaningful rather than displaying all ten numeric codes if several are rare.
 
-## Output to add after running
+### Output to add after running
 
 Add one figure and identify countries where assessment coverage is materially lower than the nominal 7–14 target population.

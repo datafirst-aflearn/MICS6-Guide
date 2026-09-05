@@ -1,6 +1,6 @@
-# Worked example 8: Timing within the school year {#c06-school-timing}
+## Timing within the school year {#c06-school-timing}
 
-## Research question
+### Research question
 
 > If two children are both labelled "Grade 3", have they necessarily had the same amount of exposure to Grade 3 instruction?
 
@@ -10,23 +10,11 @@ MICS fieldwork can occur at different points in the school year across countries
 
 This matters when interpreting cross-country grade trajectories.
 
-## What you need
+### What you need
 
-AFLEARN's harmonised FS file already contains:
+AFLEARN's harmonised FS file already contains `interview_month`, but the current processing does not contain a harmonised variable measuring the child's position within the country's school year.
 
-```text
-interview_month
-```
-
-but the current processing does **not** contain a harmonised variable measuring the child's position within the country's school year.
-
-For this example, create:
-
-```text
-school_month
-```
-
-where:
+For this example, create `school_month` where:
 
 ```text
 0 = beginning of school year
@@ -36,7 +24,7 @@ where:
 
 This requires a country-level lookup table giving the school-year start month.
 
-## Example lookup
+### Example lookup
 
 Illustrative structure:
 
@@ -49,9 +37,9 @@ MWI            ...
 
 The values must be verified from country education calendars or survey documentation before publication.
 
-## Convert interview month to months through school year
+### Convert interview month to months through school year
 
-### R
+#### R
 
 ```{r eval=FALSE}
 d <- d %>%
@@ -68,7 +56,7 @@ d <- d %>%
 
 Depending on survey timing and holidays, a simple month difference may need country-specific adjustment.
 
-## Construct grade progress
+### Construct grade progress
 
 For children in a comparable grade system:
 
@@ -90,9 +78,9 @@ Grade 4, start of year       ≈ 4.0
 
 This is an approximation to instructional exposure, not a literal measure of time in school.
 
-## Fit a trajectory
+### Fit a trajectory
 
-### R
+#### R
 
 ```{r eval=FALSE}
 model <- svyglm(
@@ -125,7 +113,7 @@ regTermTest(
 
 Depending on the fitted model and package behaviour, the exact joint-test syntax may need adjustment. The production script should verify the coefficient names and test matrix explicitly.
 
-### Stata
+#### Stata
 
 ```stata
 gen gradeprogress = current_grade + school_month/12
@@ -139,7 +127,7 @@ testparm i.country_iso3#c.gradeprogress ///
          i.country_iso3#c.gradeprogress#c.gradeprogress
 ```
 
-## Predicted trajectories
+### Predicted trajectories
 
 In Stata:
 
@@ -152,24 +140,12 @@ marginsplot
 
 In R, generate a prediction grid and use `predict()` with standard errors, or use a survey-compatible marginal-estimation package after verifying its handling of `svyglm`.
 
-## Why this example is more advanced
+### Why this example is more advanced
 
 `gradeprogress` solves only one comparability problem.
 
-It does **not** account for:
+It does not account for differences in official school-entry age, grade repetition, interruptions to schooling, variation in instructional time, attendance, curriculum differences, or differences in the meaning of grade across education systems.
 
-- differences in official school-entry age;
-- grade repetition;
-- interruptions to schooling;
-- variation in instructional time;
-- attendance;
-- curriculum differences; or
-- differences in the meaning of grade across education systems.
+It should therefore be described as an adjustment for survey timing within the school year, not a complete measure of schooling exposure.
 
-It should therefore be described as an adjustment for **survey timing within the school year**, not a complete measure of schooling exposure.
-
-## Suggested use in the guide
-
-Keep this as the final, advanced worked example.
-
-It demonstrates how the rich timing information in MICS can improve cross-country comparisons while also showing why researchers need to be explicit about the assumptions behind derived variables.
+This is the final, advanced worked example. It demonstrates how the rich timing information in MICS can improve cross-country comparisons while also showing why researchers need to be explicit about the assumptions behind derived variables.

@@ -1,22 +1,22 @@
-# Prepare the analysis data {#c06-prepare-analysis}
+## Prepare the analysis data {#c06-prepare-analysis}
 
 All of the worked examples start from one child-level analysis file.
 
 For the UNICEF-based workflow, combine:
 
 ```text
-mics6_fs_harmonized
+mics6-fs-harmonised
         +
-mics6_reading_harmonized
+mics6-reading-harmonised
         +
 survey design variables
         +
 household wealth (for the wealth example)
 ```
 
-## 1. Read the harmonised files
+### 1. Read the harmonised files
 
-### R
+#### R
 
 ```{r eval=FALSE}
 library(tidyverse)
@@ -25,11 +25,11 @@ library(survey)
 library(srvyr)
 
 fs <- read_dta(
-  "Data/AFLEARN Harmonised Data/mics6_fs_harmonized.dta"
+  "Data/AFLEARN Harmonised Data/mics6-fs-harmonised.dta"
 )
 
 reading <- read_dta(
-  "Data/AFLEARN Harmonised Data/mics6_reading_harmonized.dta"
+  "Data/AFLEARN Harmonised Data/mics6-reading-harmonised.dta"
 )
 ```
 
@@ -51,21 +51,21 @@ d <- fs %>%
   )
 ```
 
-### Stata
+#### Stata
 
 ```stata
-use "Data/AFLEARN Harmonised Data/mics6_fs_harmonized.dta", clear
+use "Data/AFLEARN Harmonised Data/mics6-fs-harmonised.dta", clear
 
 merge 1:1 country_iso3 year HH1 HH2 LN using ///
-    "Data/AFLEARN Harmonised Data/mics6_reading_harmonized.dta"
+    "Data/AFLEARN Harmonised Data/mics6-reading-harmonised.dta"
 
 tab _merge
 drop _merge
 ```
 
-## 2. Retain `PSU` and `stratum` in the AFLEARN FS harmonisation
+### 2. Retain `PSU` and `stratum` in the AFLEARN FS harmonisation
 
-The current AFLEARN `harmonize-mics-fs-v1.0.R` script retains `fsweight` but does **not yet retain `PSU` and `stratum`**.
+The current AFLEARN `harmonize-mics-fs-v1.0.R` script retains `fsweight` but does not yet retain `PSU` and `stratum`.
 
 These variables should be added to the harmonised FS output before publishing the worked examples.
 
@@ -87,11 +87,11 @@ After that small change, every worked example can use the same design specificat
 Use the sampling-error variables supplied in the MICS data.
 :::
 
-## 3. Create identifiers that are unique across surveys
+### 3. Create identifiers that are unique across surveys
 
 Because PSU and stratum codes can repeat across countries and years, create pooled identifiers.
 
-### R
+#### R
 
 ```{r eval=FALSE}
 d <- d %>%
@@ -108,7 +108,7 @@ d <- d %>%
   )
 ```
 
-### Stata
+#### Stata
 
 ```stata
 egen survey_id = group(country_iso3 year)
@@ -116,9 +116,9 @@ egen psu_pool = group(survey_id PSU)
 egen stratum_pool = group(survey_id stratum)
 ```
 
-## 4. Create the survey design
+### 4. Create the survey design
 
-### R
+#### R
 
 ```{r eval=FALSE}
 des <- d %>%
@@ -130,15 +130,15 @@ des <- d %>%
   )
 ```
 
-### Stata
+#### Stata
 
 ```stata
 svyset psu_pool [pw=fsweight], strata(stratum_pool)
 ```
 
-## 5. Construct common numeracy measures
+### 5. Construct common numeracy measures
 
-The AFLEARN FS file currently retains the harmonised **item responses** but does not derive numeracy scores.
+The AFLEARN FS file currently retains the harmonised item responses but does not derive numeracy scores.
 
 The standard harmonised names are:
 
@@ -157,11 +157,11 @@ Responses are coded so that:
 3 = no attempt
 ```
 
-The standard questionnaire also contains stop rules. For a descriptive **total-correct score**, this guide scores an administered item as 1 if correct and 0 otherwise, and scores items not reached because of the numeracy stop rule as 0 for children who participated in the FLS assessment.
+The standard questionnaire also contains stop rules. For a descriptive total-correct score, this guide scores an administered item as 1 if correct and 0 otherwise, and scores items not reached because of the numeracy stop rule as 0 for children who participated in the FLS assessment.
 
 This produces a score from 0 to 21.
 
-### R helper
+#### R helper
 
 ```{r eval=FALSE}
 score_correct <- function(x) {
@@ -215,7 +215,7 @@ d <- d %>%
 
 Before publication, AFLEARN should validate this total-score construction against the questionnaire routing in each supported survey.
 
-## 6. Construct task-level measures
+### 6. Construct task-level measures
 
 For descriptive analysis, calculate the number correct in each domain:
 
@@ -245,7 +245,7 @@ d <- d %>%
 
 The final production version should also include a validated `foundational_numeracy` variable reproducing the published MICS indicator.
 
-## 7. Check everything before analysis
+### 7. Check everything before analysis
 
 At minimum:
 

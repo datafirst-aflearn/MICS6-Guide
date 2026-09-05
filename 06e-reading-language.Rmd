@@ -1,30 +1,18 @@
-# Worked example 4: Reading language and assessment coverage {#c06-reading-language}
+## Reading language and assessment coverage {#c06-reading-language}
 
-## Research question
+### Research question
 
 > In which language was each child assessed, and how does assessment-language coverage vary?
 
 Reading is different from numeracy because it requires a language-specific passage.
 
-The harmonised reading file contains:
+The harmonised reading file contains `passage_language`, and AFLEARN's routing variable identifies `reading_status == 4` for an assessment-language mismatch.
 
-```text
-passage_language
-```
-
-and AFLEARN's routing variable identifies:
-
-```text
-reading_status == 4
-```
-
-for an assessment-language mismatch.
-
-## Distribution of assessment languages
+### Distribution of assessment languages
 
 Among children who attempted a passage:
 
-### R
+#### R
 
 ```{r eval=FALSE}
 des %>%
@@ -42,7 +30,7 @@ des %>%
   )
 ```
 
-### Stata
+#### Stata
 
 ```stata
 gen read_attempt = inlist(reading_status,7,8)
@@ -51,9 +39,9 @@ svy, subpop(if inrange(age,7,14) & read_attempt): ///
     proportion passage_language, over(country_iso3)
 ```
 
-## Language mismatch among all age-eligible children
+### Language mismatch among all age-eligible children
 
-### R
+#### R
 
 ```{r eval=FALSE}
 des %>%
@@ -71,22 +59,13 @@ des %>%
   )
 ```
 
-## Relate assessment language to home and school language
+### Relate assessment language to home and school language
 
-The FS harmonised file contains:
-
-```text
-lang_home
-lang_school
-```
-
-but these codes are **country-specific**.
+The FS harmonised file contains `lang_home` and `lang_school`, but these codes are country-specific.
 
 Do not pool their numeric values across countries.
 
 Within one survey, however, you can examine alignment.
-
-For example:
 
 ```{r eval=FALSE}
 d %>%
@@ -100,7 +79,7 @@ d %>%
 
 For weighted percentages, use the survey design object.
 
-## Malawi as a validation example
+### Malawi as a validation example
 
 Malawi is especially useful because the survey administered English and Chichewa passages.
 
@@ -108,20 +87,15 @@ After merging the AFLEARN reading file, both passage languages should appear amo
 
 This is an important check because the IPUMS reading variables retain only one passage in this multi-passage survey.
 
-## Interpretation
+### Interpretation
 
-A lower reading-assessment rate can arise partly from the relationship between:
-
-- home language;
-- school language;
-- available assessment language; and
-- questionnaire routing.
+A lower reading-assessment rate can arise partly from the relationship between home language, school language, available assessment language, and questionnaire routing.
 
 This is not merely a technical issue.
 
 If children from particular linguistic groups are less likely to receive a valid reading assessment, the observed reading sample differs from the target-age population.
 
-## Suggested outputs
+### Suggested outputs
 
 For multilingual surveys, show:
 

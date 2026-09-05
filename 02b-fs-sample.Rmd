@@ -1,17 +1,13 @@
-# Who is in the `fs` file? {#c02-fs-sample}
+## Who is in the `fs` file? {#c02-fs-sample}
 
-Understanding the `fs` sample is essential before analysing the Foundational Learning Skills data.
+The `fs` file is sometimes loosely described as the "children aged 5–17 file". That shorthand obscures two facts:
 
-The `fs` file is sometimes loosely described as the "children aged 5–17 file". That is useful shorthand, but it can obscure two important facts:
-
-1. **only one eligible child aged 5–17 is randomly selected per sampled household** for the questionnaire; and
-2. the **Foundational Learning Skills assessment itself targets children aged 7–14**, not everyone in the `fs` file.
+1. only one eligible child aged 5–17 is randomly selected per sampled household for the questionnaire; and
+2. the Foundational Learning Skills assessment itself targets children aged 7–14, not everyone in the `fs` file.
 
 UNICEF documents the 5–17 questionnaire as being administered for one randomly selected child aged 5–17 in each household. The standard questionnaire then routes children aged 5–6 and 15–17 around the FLS module, leaving children aged 7–14 eligible for the learning assessment. See the [MICS6 Manual for Statistical Data Analysis](https://data.unicef.org/wp-content/uploads/2019/07/MICS6-manual-for-stats-data-analysis-English_2020_v2.pdf) and [standard MICS6 Questionnaire for Children Age 5–17](https://mics.ipums.org/mics-action/source_documents/survey_form_mics6_fs.xml).
 
-## From household members to the FLS sample
-
-Conceptually, the process is:
+### From household members to the FLS sample
 
 ```text
 Sampled household
@@ -35,13 +31,9 @@ Create an fs questionnaire/record
       └──────── age 15–17 ──────► no FLS assessment
 ```
 
-This has several implications for analysis.
-
-## The `fs` file is not a census of all children aged 5–17 in sampled households
+### The `fs` file is not a census of all children aged 5–17 in sampled households
 
 A household can contain more than one child aged 5–17, but only one is selected for the questionnaire.
-
-For example:
 
 ```text
 Household A
@@ -54,13 +46,11 @@ You therefore cannot simply merge the `fs` file onto every child aged 5–17 in 
 
 The selection process is reflected in the survey weight for the 5–17 questionnaire.
 
-## Use the `fs` weight for analyses whose observations are selected children
+### Use the `fs` weight for analyses whose observations are selected children
 
 MICS provides questionnaire-specific survey weights. For the selected child file, the standard weight is `fsweight`.
 
-If your outcome is foundational reading or numeracy and your analysis dataset consists of `fs` records, **the relevant weight is the `fs` weight**, even if you merge household or household-member characteristics onto those records.
-
-For example:
+If the outcome is foundational reading or numeracy and the analysis dataset consists of `fs` records, the relevant weight is the `fs` weight, even if you merge household or household-member characteristics onto those records.
 
 ```text
 Outcome: foundational numeracy       from fs
@@ -71,26 +61,17 @@ Unit of analysis: selected child
 Weight: fsweight
 ```
 
-The source of a covariate does not determine the survey weight. The **analysis population** does.
+The source of a covariate does not determine the survey weight. The analysis population does. See [Which MICS weight should I use?](#c05-weights).
 
-We explain weights, clustering and stratification in detail in [Survey design, weights and standard errors](#c05-survey-design).
-
-## The FLS target population is children aged 7–14
+### The FLS target population is children aged 7–14
 
 The MICS6 FLS module directly assesses reading and numeracy among children aged 7–14. UNICEF describes the module as measuring skills expected at approximately Grade 2/3 level in a household-survey setting.
 
-This age range is one of the major analytical strengths of MICS. Researchers can examine foundational skills:
-
-- among children currently attending school;
-- among children who have never attended school;
-- among children who attended previously but are no longer in school;
-- by age rather than only grade;
-- across grades; and
-- in relation to household and family characteristics.
+This age range is one of the major analytical strengths of MICS. Researchers can examine foundational skills among children currently attending school, among children who have never attended, among children who attended previously but are no longer in school, by age rather than only grade, across grades, and in relation to household and family characteristics.
 
 Because MICS is household based, the assessment is not restricted to children who are present in school on an assessment day.
 
-## Being age 7–14 does not guarantee a completed assessment
+### Being age 7–14 does not guarantee a completed assessment
 
 Age determines eligibility for the FLS module, but not every eligible child necessarily completes every assessment task.
 
@@ -103,21 +84,15 @@ The reading module contains several routing decisions. A child may, for example:
 - not progress through the practice items where these apply; or
 - begin the assessment but not complete it.
 
-These cases should **not automatically be treated as equivalent missing values**.
+These cases should not automatically be treated as equivalent missing values.
 
-This is one reason AFLEARN constructs a `reading_status` variable that makes the reading pathway explicit. We introduce the assessment sequence in [Understanding the MICS6 reading assessment](#c02-reading) and provide the research-ready construction in [Constructing MICS6 reading outcomes](#c03-reading).
+This is one reason AFLEARN constructs a `reading_status` variable that makes the reading pathway explicit. The assessment sequence is in [Understanding the MICS6 reading assessment](#c02-reading); the research-ready construction is in [Constructing research-ready reading variables](#c03-reading).
 
-## Age, grade and the official indicators are different concepts
+### Age, grade and the official indicators are different concepts
 
 MICS allows researchers to describe foundational learning for several populations.
 
-For example, UNICEF tabulations distinguish between:
-
-- children aged 7–14;
-- children of the expected age for Grade 2/3; and
-- children actually attending Grade 2/3.
-
-These denominators answer different questions.
+UNICEF tabulations distinguish between children aged 7–14, children of the expected age for Grade 2/3, and children actually attending Grade 2/3. These denominators answer different questions.
 
 A child aged 10 in Grade 2 can contribute to a grade-based Grade 2/3 estimate even though they are older than the expected age for that grade. Conversely, a child of the expected Grade 2/3 age may be in a different grade or out of school.
 
@@ -126,7 +101,7 @@ A child aged 10 in Grade 2 can contribute to a grade-based Grade 2/3 estimate ev
 :::
 
 ::: {.alternativebox}
-"Percentage with foundational reading skills" is incomplete unless the reader knows **among whom**: all children aged 7–14, children of Grade 2/3 age, children attending Grade 2/3, or another explicitly defined population.
+"Percentage with foundational reading skills" is incomplete unless the reader knows among whom: all children aged 7–14, children of Grade 2/3 age, children attending Grade 2/3, or another explicitly defined population.
 :::
 
-This guide's worked examples will show how to construct and report these populations transparently.
+The worked examples show how to construct and report these populations transparently.

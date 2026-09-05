@@ -1,6 +1,6 @@
-# Harmonising variables across countries {#c03-harmonise}
+## Harmonising variables across countries {#c03-harmonise}
 
-The MICS6 questionnaires are standardised, but the released country datasets are **not identical**.
+The MICS6 questionnaires are standardised, but the released country datasets are not identical.
 
 Differences can include:
 
@@ -12,18 +12,18 @@ Differences can include:
 - country-specific response categories; and
 - occasional questionnaire or data-layout anomalies.
 
-Simply appending `fs.sav` files from several countries will therefore not produce a reliable multi-country analysis file.
+Appending `fs.sav` files from several countries will not produce a reliable multi-country analysis file.
 
 AFLEARN provides an R script that does the repetitive harmonisation work for the MICS6 surveys covered by this guide.
 
-## What the AFLEARN script produces
+### What the AFLEARN script produces
 
 The current script is [`harmonize-mics-fs-v1.0.R`](https://github.com/datafirst-aflearn/MICS6-Guide/blob/main/Script/harmonize-mics-fs-v1.0.R). It reads the survey folders in `Data/UNICEF/` and writes to `Data/AFLEARN Harmonised Data/`:
 
 | Output | Purpose |
 |---|---|
-| `mics6_fs_harmonized.dta` | Harmonised child-level analysis file, readable in both R and Stata |
-| `mics6_fs_variable_crosswalk.xlsx` | Documentation showing source variables, harmonisation maps, exclusions and notes |
+| `mics6-fs-harmonised.dta` and `.rds` | Harmonised child-level analysis file, readable in both R and Stata |
+| `mics6_fs_variable_crosswalk.xlsx` | Source variables, harmonisation maps, exclusions and notes |
 
 The existing AFLEARN implementation covers 18 African MICS6 country codes:
 
@@ -33,11 +33,9 @@ BEN CAF COD COM GHA GMB GNB LSO MDG MWI NGA SLE STP SWZ TCD TGO TUN ZWE
 
 Tunisia has more than one MICS6 survey year in the current processing system.
 
-## What is harmonised?
+### What is harmonised?
 
 The script creates a child-level file containing commonly used variables from the MICS6 5–17 questionnaire and selected linked information.
-
-Broad groups include:
 
 | Area | Examples |
 |---|---|
@@ -53,16 +51,22 @@ Broad groups include:
 | Discipline | discipline methods and attitudes |
 | Foundational learning | numeracy items and FLS setup variables |
 
-**Reading outcomes are kept separate** because they require additional passage-specific processing. They are constructed on the next page and can be merged onto this file using the child identifiers.
+Reading outcomes are kept separate because they require additional passage-specific processing. They are constructed on the next page and can be merged onto this file using the child identifiers.
 
-## How to run it
+The current script retains `fsweight` but not `PSU`, `stratum` or `windex5`. Add those from the source files before survey-weighted analysis; see [Prepare the analysis data](#c06-prepare-analysis).
 
-You need the clean UNICEF survey structure created in [Organising the UNICEF download](#c03-organise).
+### How to re-run it
 
-Your project should look approximately like:
+`run-it.R` already sources this script after unpacking the UNICEF download. To re-run only the FS harmonisation, from the project directory:
+
+```{r eval=FALSE}
+source("Script/harmonize-mics-fs-v1.0.R")
+```
+
+The project should look like:
 
 ```text
-your-project/
+MICS project/
 ├── Data/
 │   ├── UNICEF/
 │   │   ├── BEN_2021_MICS6_v01_M/
@@ -75,17 +79,11 @@ your-project/
     └── harmonize-mics-fs-v1.0.R
 ```
 
-From the project directory:
-
-```{r eval=FALSE}
-source("Script/harmonize-mics-fs-v1.0.R")
-```
-
 The script uses R packages including `tidyverse`, `haven`, `labelled` and `openxlsx`.
 
 The country-specific renaming rules, questionnaire anomalies and coding decisions are documented in [Technical documentation](#c07-technical), together with the variable crosswalk.
 
-## Important: harmonised name does not always mean harmonised meaning
+### A harmonised name does not always mean harmonised meaning
 
 Some variables have a common name but intentionally retain country-specific codes.
 
@@ -109,42 +107,35 @@ father_edu_h
 
 These provide a common broad education-level classification.
 
-## Grade needs particular care
+### Grade needs particular care
 
-`current_grade` is the year **within an education level**, not necessarily the child's overall year of schooling.
-
-For example:
+`current_grade` is the year within an education level, not the child's overall year of schooling.
 
 ```text
 Primary, year 1       current_grade = 1
 Secondary, year 1     current_grade = 1
 ```
 
-Those children are obviously not at the same point in the school system.
+Those children are not at the same point in the school system.
 
-Use `current_grade` together with the harmonised education-level variable, or construct a system-level grade measure appropriate to your analysis.
+Use `current_grade` together with the harmonised education-level variable, or construct a system-level grade measure appropriate to the analysis. See [Why current_grade is not the child's grade](#c07-current-grade).
 
-The existing AFLEARN guide contains detailed work on this issue; it should be retained as a focused technical/resource page rather than buried inside the general harmonisation explanation.
-
-## Check the output
+### Check the output
 
 In R:
 
 ```{r eval=FALSE}
 library(tidyverse)
 
-d <- haven::read_dta("Data/AFLEARN Harmonised Data/mics6_fs_harmonized.dta")
+d <- haven::read_dta("Data/AFLEARN Harmonised Data/mics6-fs-harmonised.dta")
 
-# Surveys represented
 d %>%
   count(country_iso3, year)
 
-# Check unique child keys within surveys
 d %>%
   count(country_iso3, year, HH1, HH2, LN) %>%
   filter(n > 1)
 
-# Look at some harmonised variables
 d %>%
   count(country_iso3, current_level_h)
 
@@ -155,7 +146,7 @@ d %>%
 In Stata:
 
 ```stata
-use "Data/AFLEARN Harmonised Data/mics6_fs_harmonized.dta", clear
+use "Data/AFLEARN Harmonised Data/mics6-fs-harmonised.dta", clear
 
 tab country_iso3
 tab current_level_h country_iso3
@@ -164,21 +155,10 @@ tab mother_edu_h country_iso3
 isid country_iso3 year HH1 HH2 LN
 ```
 
-## Use the crosswalk
+### Use the crosswalk
 
-The Excel crosswalk is part of the research output, not an optional extra. It is published with the harmonisation code in the [AFLEARN MICS6-Guide repository](https://github.com/datafirst-aflearn/MICS6-Guide).
+The Excel crosswalk is part of the research output. It is published with the harmonisation code in the [AFLEARN MICS6-Guide repository](https://github.com/datafirst-aflearn/MICS6-Guide). How to read it is in [Variable crosswalks and dictionaries](#c07-crosswalks).
 
-The current script creates sheets documenting:
+If a variable matters substantively to the research question, check its crosswalk entry before pooling it across countries.
 
-- the source variable used in each survey;
-- excluded variables;
-- mappings used for harmonised education levels; and
-- country-specific notes and caveats.
-
-If a variable matters substantively to your research question, check its crosswalk entry before pooling it across countries.
-
-## Reading is handled separately
-
-The harmonised `fs` file contains numeracy items and other FLS setup variables, but **does not duplicate the research-ready reading outcomes**. Reading requires passage-specific processing, which is done by a separate script.
-
-Continue to [Constructing research-ready reading variables](#c03-reading).
+The harmonised `fs` file contains numeracy items and other FLS setup variables, but does not duplicate the research-ready reading outcomes. Continue to [Constructing research-ready reading variables](#c03-reading).

@@ -1,10 +1,10 @@
-# Variable crosswalks and dictionaries {#c07-crosswalks}
+## Variable crosswalks and dictionaries {#c07-crosswalks}
 
 A harmonised variable should always be traceable back to its source.
 
 AFLEARN therefore treats the variable crosswalk as part of the data product, not as optional documentation.
 
-## FS crosswalk
+### FS crosswalk
 
 The FS processing script writes:
 
@@ -21,13 +21,9 @@ The current workbook contains four sheets:
 | `level_map` | Raw education codes mapped to harmonised education levels |
 | `notes` | Country- and theme-specific caveats |
 
-## How to use the crosswalk
+### How to use the crosswalk
 
-Suppose you want to analyse:
-
-```text
-father_edu_h
-```
+Suppose you want to analyse `father_edu_h`.
 
 Do not stop at the variable label.
 
@@ -41,7 +37,7 @@ Use the crosswalk to answer:
 
 This is especially important for variables that required construction rather than simple renaming.
 
-## What should be in a good crosswalk row?
+### What should be in a good crosswalk row?
 
 At minimum:
 
@@ -58,7 +54,7 @@ notes
 
 The existing workbook already contains much of this information. As the revised guide develops, it would be useful to make `source_file` and `transformation` explicit wherever a variable is constructed from another file or recoded.
 
-## Reading crosswalk
+### Reading crosswalk
 
 The reading script currently documents mappings primarily in code and in the existing technical guide.
 
@@ -85,9 +81,9 @@ MWI | 2019 | words_att | Chichewa | FLB20A | passage-specific processing | ...
 
 This would make the multi-passage logic much easier to audit.
 
-## Variable dictionary
+### Variable dictionary
 
-Researchers also need a user-facing dictionary describing the **final** analysis variables.
+Researchers also need a user-facing dictionary describing the final analysis variables.
 
 A useful dictionary should include:
 
@@ -102,17 +98,11 @@ harmonisation depth
 comparability warning
 ```
 
-The distinction between **source** and **universe** is particularly important.
+The distinction between source and universe is particularly important.
 
-For example:
+For example, `reading_accuracy` may exist for only the subset of children who reached a reading passage, even though the overall FS file covers ages 5–17.
 
-```text
-reading_accuracy
-```
-
-may exist for only the subset of children who reached a reading passage, even though the overall FS file covers ages 5–17.
-
-## Harmonisation depth
+### Harmonisation depth
 
 One useful addition to the AFLEARN dictionary would be an explicit field such as:
 
@@ -126,8 +116,6 @@ country-specific construction
 
 This tells users how much processing sits behind a common variable name.
 
-For example:
-
 | Variable | Harmonisation depth |
 |---|---|
 | `age` | rename only |
@@ -137,22 +125,15 @@ For example:
 | `reading_status` | multi-step country-aware construction |
 | `passage_language` | country-specific construction |
 
-## Excluded variables are documentation too
+### Excluded variables are documentation too
 
 The `excluded` sheet should remain.
 
-When a source field is deliberately omitted because:
-
-- it is country-specific;
-- it cannot be harmonised defensibly;
-- it duplicates another processed block; or
-- it falls outside the scope of the guide,
-
-recording that decision is preferable to silently dropping it.
+When a source field is deliberately omitted because it is country-specific, cannot be harmonised defensibly, duplicates another processed block, or falls outside the scope of the guide, recording that decision is preferable to silently dropping it.
 
 An excluded-variable register prevents future maintainers from repeatedly rediscovering why a field was left out.
 
-## Recommended downloadable documentation bundle
+### Recommended downloadable documentation bundle
 
 The final guide would ideally distribute:
 

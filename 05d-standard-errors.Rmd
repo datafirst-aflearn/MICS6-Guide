@@ -1,8 +1,6 @@
-# Getting standard errors right {#c05-standard-errors}
+## Getting standard errors right {#c05-standard-errors}
 
 A point estimate and its uncertainty answer different questions.
-
-For example:
 
 ```text
 Estimated foundational numeracy = 23%
@@ -12,13 +10,9 @@ tells us the estimated population proportion.
 
 A standard error tells us how precisely that proportion has been estimated under the sample design.
 
-MICS analyses should therefore use design-based standard errors that account for:
+MICS analyses should therefore use design-based standard errors that account for the selected-child weight, clustering within PSUs, and stratification.
 
-- the selected-child weight;
-- clustering within PSUs; and
-- stratification.
-
-## A quick comparison
+### A quick comparison
 
 Consider these three approaches:
 
@@ -34,7 +28,7 @@ The first ignores unequal selection probabilities.
 
 The second incorporates weights into the point estimate but still ignores the clustered and stratified design in the variance calculation.
 
-## Confidence intervals
+### Confidence intervals
 
 A 95% confidence interval combines the estimate and its standard error.
 
@@ -59,7 +53,7 @@ svy: mean foundational_numeracy
 
 Both return design-based uncertainty once the survey design has been specified correctly.
 
-## Subgroups can become imprecise quickly
+### Subgroups can become imprecise quickly
 
 MICS surveys are designed to produce reliable estimates for specified populations and reporting domains. A dataset containing thousands of children nationally can have far fewer effective observations once you estimate, for example:
 
@@ -79,17 +73,15 @@ Check:
 - confidence interval;
 - and, where useful, coefficient of variation or design effect.
 
-## Design effects
+### Design effects
 
-The **design effect** compares the variance under the actual complex design with a reference variance under simple random sampling.
+The design effect compares the variance under the actual complex design with a reference variance under simple random sampling.
 
 Values above 1 indicate that the complex design produces a larger variance than the simple-random-sample reference.
 
 Clustering often increases variance because children within the same PSU are correlated. Stratification can improve precision.
 
 In R, many `survey`/`srvyr` estimators can return a design effect.
-
-For example:
 
 ```{r eval=FALSE}
 svymean(
@@ -102,7 +94,7 @@ svymean(
 
 Design effects are useful diagnostics, but they are not a substitute for actually specifying the survey design.
 
-## Degrees of freedom
+### Degrees of freedom
 
 For complex survey inference, precision depends strongly on the number of independent sampled PSUs, not simply the number of child observations.
 
@@ -110,23 +102,17 @@ Survey software therefore uses design-based degrees of freedom when constructing
 
 This is another reason that a regression with several thousand child records may still have much less independent information than the raw `N` suggests.
 
-## Missing outcomes
+### Missing outcomes
 
 If an outcome is missing, survey estimators generally omit those observations for that particular estimate when `na.rm = TRUE` or the corresponding Stata command handles missing values.
 
-But with reading, **why the outcome is missing matters substantively**.
+But with reading, why the outcome is missing matters substantively.
 
-Before estimating reading performance, use AFLEARN's `reading_status` to understand whether children:
-
-- were outside the target age;
-- did not have consent;
-- faced an assessment-language mismatch;
-- did not proceed through the reading sequence; or
-- attempted the passage.
+Before estimating reading performance, use AFLEARN's `reading_status` to understand whether children were outside the target age, did not have consent, faced an assessment-language mismatch, did not proceed through the reading sequence, or attempted the passage.
 
 Do not treat all missing reading values as a generic statistical nuisance.
 
-## Domain analysis, again
+### Domain analysis, again
 
 Suppose the target is:
 
@@ -157,11 +143,11 @@ pretend remaining observations
 were the original survey sample
 ```
 
-In R, subset/filter the survey **design object**.
+In R, subset/filter the survey design object.
 
 In Stata, use `subpop()`.
 
-## Regressions also need the survey design
+### Regressions also need the survey design
 
 The issue does not disappear when you move from descriptive statistics to regression.
 
@@ -185,9 +171,9 @@ svy: regress pct_total_math ///
 
 For binary outcomes, use an appropriate survey-aware model rather than an ordinary model with weights added informally.
 
-## A practical reporting standard
+### A practical reporting standard
 
-For descriptive MICS estimates, we recommend reporting enough information for readers to understand precision:
+For descriptive MICS estimates, report enough information for readers to understand precision:
 
 ```text
 estimate

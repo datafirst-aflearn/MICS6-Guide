@@ -1,4 +1,4 @@
-# Setting up one MICS6 survey {#c05-single-survey}
+## Setting up one MICS6 survey {#c05-single-survey}
 
 For a single MICS6 survey, the standard selected-child design uses:
 
@@ -8,9 +8,7 @@ PSU      = PSU
 stratum  = stratum
 ```
 
-This page shows how to set that design up in R and Stata.
-
-## First check the design variables
+### First check the design variables
 
 Before creating a survey object:
 
@@ -18,7 +16,7 @@ Before creating a survey object:
 library(haven)
 library(dplyr)
 
-d <- read_dta("Data/AFLEARN Harmonised Data/mics6_fs_harmonized.dta")
+d <- read_dta("Data/AFLEARN Harmonised Data/mics6-fs-harmonised.dta")
 
 d %>%
   summarise(
@@ -31,7 +29,7 @@ d %>%
   )
 ```
 
-If you are using the AFLEARN harmonised file, confirm the final exact capitalisation of `PSU` in the production version.
+If you are using the AFLEARN harmonised file, confirm the final exact capitalisation of `PSU` in the production version. The current script retains `fsweight` but not yet `PSU` and `stratum`; see [Prepare the analysis data](#c06-prepare-analysis).
 
 You should also check how many PSUs occur within each stratum:
 
@@ -42,7 +40,7 @@ d %>%
   arrange(n_psu)
 ```
 
-## R: the `survey` package
+### R: the `survey` package
 
 ```{r eval=FALSE}
 library(survey)
@@ -78,7 +76,7 @@ svymean(
 )
 ```
 
-## R: `srvyr` for tidyverse-style analysis
+### R: `srvyr` for tidyverse-style analysis
 
 If you prefer `dplyr` syntax, `srvyr` wraps the `survey` package.
 
@@ -121,7 +119,7 @@ des %>%
   )
 ```
 
-## Stata
+### Stata
 
 ```stata
 svyset PSU [pw=fsweight], strata(stratum)
@@ -147,11 +145,11 @@ svy: mean foundational_numeracy
 
 The mean of a variable coded 0/1 is the estimated proportion equal to 1.
 
-## Why not use `HH1` automatically as the PSU?
+### Why not use `HH1` automatically as the PSU?
 
 MICS datasets contain both the original cluster identifier (`HH1`) and design variables such as `PSU`.
 
-For many surveys these may correspond closely, but the safest approach is to use the **sampling-error design variables supplied with the released data**.
+For many surveys these may correspond closely, but the safest approach is to use the sampling-error design variables supplied with the released data.
 
 In the standard MICS6 naming convention:
 
@@ -162,7 +160,7 @@ stratum  sample stratum
 
 IPUMS also harmonises these as `PSU` and `STRATUM`.
 
-## Lonely PSUs
+### Lonely PSUs
 
 Variance estimation within a stratum relies on having more than one sampled PSU in that stratum.
 
@@ -183,7 +181,7 @@ but the chosen treatment should be documented.
 
 In Stata, inspect singleton-unit messages and the survey design rather than silently ignoring them.
 
-## Do not filter the raw data before defining the survey design
+### Do not filter the raw data before defining the survey design
 
 This is especially important when estimating a subgroup.
 
@@ -205,7 +203,7 @@ des <- svydesign(
 )
 ```
 
-Instead, define the survey design using the full relevant sample and then restrict the **design object**:
+Instead, define the survey design using the full relevant sample and then restrict the design object:
 
 ```{r eval=FALSE}
 des <- svydesign(
@@ -231,7 +229,7 @@ des_7_14 <- des %>%
 
 This preserves the information survey software needs for correct domain/subpopulation variance estimation.
 
-## Stata subpopulations
+### Stata subpopulations
 
 The same principle applies in Stata.
 
@@ -252,6 +250,4 @@ svy, subpop(age7_14): mean pct_total_math
 
 `subpop()` tells Stata that the target is a subpopulation of the original survey sample.
 
-## Next
-
-If your analysis contains more than one MICS survey, additional steps are required. Continue to [Combining MICS6 surveys](#c05-pooling).
+If the analysis contains more than one MICS survey, additional steps are required. Continue to [Combining MICS6 surveys](#c05-pooling).

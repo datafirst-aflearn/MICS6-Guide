@@ -20,8 +20,8 @@ library(srvyr)
 
 harmonised <- file.path("Data", "AFLEARN Harmonised Data")
 
-fs <- read_dta(file.path(harmonised, "mics6_fs_harmonized.dta"))
-reading <- read_dta(file.path(harmonised, "mics6_reading_harmonized.dta"))
+fs <- read_dta(file.path(harmonised, "mics6-fs-harmonised.dta"))
+reading <- read_dta(file.path(harmonised, "mics6-reading-harmonised.dta"))
 
 d <- fs %>%
   left_join(

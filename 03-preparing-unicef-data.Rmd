@@ -1,0 +1,23 @@
+# Preparing UNICEF data {#c03-prepare-unicef}
+
+[Organising the UNICEF download](#c01-organise) unpacks the country files and, if the harmonisation scripts are present, writes the AFLEARN analysis files. This chapter explains what those files contain and how to extend them.
+
+The UNICEF route produces a child-level analysis file in three steps:
+
+```text
+organised country folders
+        │
+        ▼
+merge files within a country, if you need variables the scripts do not already attach
+        │
+        ▼
+harmonised selected-child file
+        +
+research-ready reading file
+```
+
+`run-it.R` already sources `harmonize-mics-fs-v1.0.R` and `harmonize-mics-reading-v1.1.R`. The pages that follow show how to re-run one of those steps, what the output variables mean, and how to merge additional source files by hand when the research question needs them.
+
+Decide what one row of the final dataset represents before merging anything. For foundational-learning research, one row is usually the selected child in `fs`. [Files, units of observation and identifiers](#c02-files) sets out the keys; this chapter shows the code.
+
+If you started from IPUMS instead, go to [Preparing IPUMS data](#c04-prepare-ipums).

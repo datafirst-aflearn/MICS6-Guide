@@ -349,8 +349,9 @@ body {
       <img class="af-card-icon" src="files/icons/ahead-bars.svg" alt="">
       <h3>1. Getting MICS6 data</h3>
       <span class="af-chip">Guide</span>
-      <p>Choose between UNICEF and IPUMS MICS, register, and download the surveys
-      you need — including when the IPUMS reading variables are unsafe.</p>
+      <p>Choose between UNICEF and IPUMS MICS, download the surveys you need,
+      and unpack the UNICEF archive — including when the IPUMS reading variables
+      are unsafe.</p>
     </a>
 
     <a class="af-card" href="c02-whats-in-data.html">
@@ -361,15 +362,15 @@ body {
       sample; and how the reading and numeracy assessments are built.</p>
     </a>
 
-    <a class="af-card" href="c03-organise.html">
+    <a class="af-card" href="c03-prepare-unicef.html">
       <img class="af-card-icon" src="files/icons/ahead-layers.svg" alt="">
       <h3>3. Preparing UNICEF data</h3>
       <span class="af-chip">Guide</span>
-      <p>Organise the download, merge files within a country, harmonise variables
-      across countries, and construct research-ready reading outcomes.</p>
+      <p>Merge files within a country, harmonise variables across countries,
+      and construct research-ready reading outcomes.</p>
     </a>
 
-    <a class="af-card" href="c04-ipums-reading.html">
+    <a class="af-card" href="c04-prepare-ipums.html">
       <img class="af-card-icon" src="files/icons/ahead-doc.svg" alt="">
       <h3>4. Preparing IPUMS data</h3>
       <span class="af-chip">Guide</span>
@@ -414,6 +415,7 @@ body {
   var destinations = [
     { t: "Getting MICS6 data", s: "Section 1", u: "c01-getting-data.html" },
     { t: "Getting data from UNICEF MICS", s: "Section 1", u: "c01-unicef.html" },
+    { t: "Organising the UNICEF download", s: "Section 1", u: "c01-organise.html" },
     { t: "Getting data from IPUMS MICS", s: "Section 1", u: "c01-ipums.html" },
 
     { t: "What's in MICS6 data?", s: "Section 2", u: "c02-whats-in-data.html" },
@@ -423,12 +425,14 @@ body {
     { t: "Understanding the reading assessment", s: "Section 2", u: "c02-reading.html" },
     { t: "Understanding the numeracy assessment", s: "Section 2", u: "c02-numeracy.html" },
 
-    { t: "Organising the UNICEF download", s: "Section 3", u: "c03-organise.html" },
+    { t: "Preparing UNICEF data", s: "Section 3", u: "c03-prepare-unicef.html" },
     { t: "Merging MICS6 files within a country", s: "Section 3", u: "c03-merge.html" },
     { t: "Harmonising variables across countries", s: "Section 3", u: "c03-harmonise.html" },
     { t: "Constructing research-ready reading variables", s: "Section 3", u: "c03-reading.html" },
 
+    { t: "Preparing IPUMS data", s: "Section 4", u: "c04-prepare-ipums.html" },
     { t: "Adding the correct reading data to an IPUMS extract", s: "Section 4", u: "c04-ipums-reading.html" },
+    { t: "Validating the combined file", s: "Section 4", u: "c04-validate.html" },
 
     { t: "Survey design, weights and standard errors", s: "Section 5", u: "c05-survey-design.html" },
     { t: "Which MICS weight should I use?", s: "Section 5", u: "c05-weights.html" },

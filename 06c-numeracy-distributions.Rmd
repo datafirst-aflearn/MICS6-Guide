@@ -1,6 +1,6 @@
-# Worked example 2: Indicators versus distributions {#c06-numeracy-distributions}
+## Indicators versus distributions {#c06-numeracy-distributions}
 
-## Research question
+### Research question
 
 > Does the headline foundational-numeracy indicator tell the same story as the underlying distribution of numeracy performance?
 
@@ -13,7 +13,7 @@ MICS6 contains 21 numeracy items across four domains:
 
 A binary indicator is useful for communication, but it compresses a large amount of information.
 
-## Construct the total score
+### Construct the total score
 
 Using the preparation code, define:
 
@@ -21,17 +21,11 @@ Using the preparation code, define:
 numeracy_total = number of items correct out of 21
 ```
 
-The production version should also contain:
+The production version should also contain `foundational_numeracy`, validated against published MICS tabulations.
 
-```text
-foundational_numeracy
-```
+### Compare the two measures
 
-validated against published MICS tabulations.
-
-## Compare the two measures
-
-### R
+#### R
 
 ```{r eval=FALSE}
 num_des <- des %>%
@@ -53,7 +47,7 @@ num_des %>%
   )
 ```
 
-### Stata
+#### Stata
 
 ```stata
 svy, subpop(if inrange(age,7,14)): ///
@@ -61,7 +55,7 @@ svy, subpop(if inrange(age,7,14)): ///
     over(country_iso3)
 ```
 
-## Look at the score distribution
+### Look at the score distribution
 
 For one country:
 
@@ -83,7 +77,7 @@ des %>%
 
 A histogram or weighted frequency plot can make the distribution visible.
 
-## Compare the four domains
+### Compare the four domains
 
 ```{r eval=FALSE}
 des %>%
@@ -109,9 +103,9 @@ des %>%
   )
 ```
 
-These are **average shares of items correct**, not the official MICS task indicators. Label them accordingly.
+These are average shares of items correct, not the official MICS task indicators. Label them accordingly.
 
-## Why this matters
+### Why this matters
 
 Consider two children:
 
@@ -122,14 +116,9 @@ Child B:  4/21
 
 A stringent binary proficiency measure can classify both below the benchmark even though their observed skill profiles are very different.
 
-This matters particularly when:
+This matters particularly when overall proficiency is low, comparing socioeconomic groups, studying progress by grade, or diagnosing which components of numeracy are most difficult.
 
-- overall proficiency is low;
-- comparing socioeconomic groups;
-- studying progress by grade; or
-- diagnosing which components of numeracy are most difficult.
-
-## Suggested figure
+### Suggested figure
 
 A useful two-panel publication figure would show:
 
@@ -142,11 +131,6 @@ for the same countries.
 
 The comparison makes visible where the ranking or apparent size of cross-country differences changes when the full score distribution is used.
 
-## Output to add after running
+### Output to add after running
 
-Add:
-
-- country means and confidence intervals;
-- the proficiency estimates;
-- one example score distribution; and
-- a brief discussion of where the binary indicator compresses meaningful variation.
+Add country means and confidence intervals, the proficiency estimates, one example score distribution, and a brief discussion of where the binary indicator compresses meaningful variation.
