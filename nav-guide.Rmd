@@ -329,10 +329,6 @@ body {
 <header class="af-wrap af-hero">
   <div>
     <h1>Analysing MICS6 foundational learning data</h1>
-    <p>A practical, reproducible route from the raw UNICEF and IPUMS MICS6 downloads
-    to survey-weighted estimates of foundational reading and numeracy — with the
-    AFLEARN scripts, harmonisation rules and technical documentation that make the
-    results defensible.</p>
   </div>
   <div class="af-lockup">
     <img src="files/AFLEARN-datahub-lockup.png"
@@ -349,57 +345,45 @@ body {
       <img class="af-card-icon" src="files/icons/ahead-bars.svg" alt="">
       <h3>1. Getting MICS6 data</h3>
       <span class="af-chip">Guide</span>
-      <p>Choose between UNICEF and IPUMS MICS, download the surveys you need,
-      and unpack the UNICEF archive — including when the IPUMS reading variables
-      are unsafe.</p>
+     
     </a>
 
     <a class="af-card" href="c02-whats-in-data.html">
       <img class="af-card-icon" src="files/icons/ahead-book.svg" alt="">
       <h3>2. What's in MICS6 data?</h3>
       <span class="af-chip">Concept</span>
-      <p>Files, units of observation and identifiers; who is in the <code>fs</code>
-      sample; and how the reading and numeracy assessments are built.</p>
+     
     </a>
 
     <a class="af-card" href="c03-prepare-unicef.html">
       <img class="af-card-icon" src="files/icons/ahead-layers.svg" alt="">
       <h3>3. Preparing UNICEF data</h3>
       <span class="af-chip">Guide</span>
-      <p>Merge files within a country, harmonise variables across countries,
-      and construct research-ready reading outcomes.</p>
     </a>
 
     <a class="af-card" href="c04-prepare-ipums.html">
       <img class="af-card-icon" src="files/icons/ahead-doc.svg" alt="">
       <h3>4. Preparing IPUMS data</h3>
       <span class="af-chip">Guide</span>
-      <p>Merge AFLEARN's corrected reading variables onto an IPUMS MICS child
-      extract so multi-passage surveys are represented in full.</p>
+     
     </a>
 
     <a class="af-card" href="c05-survey-design.html">
       <img class="af-card-icon" src="files/icons/ahead-board.svg" alt="">
       <h3>5. Survey design and weights</h3>
       <span class="af-chip">Concept</span>
-      <p>Which MICS weight to use, how to set the design for one survey or a pool
-      of surveys, and how to get standard errors right.</p>
     </a>
 
     <a class="af-card" href="c06-worked-examples.html">
       <img class="af-card-icon" src="files/icons/ahead-r.svg" alt="">
       <h3>6. Worked examples</h3>
       <span class="af-chip">Analysis</span>
-      <p>Nine end-to-end analyses in R and Stata: who is assessed, distributions
-      versus indicators, wealth gaps, schooling status and grade trajectories.</p>
     </a>
 
     <a class="af-card" href="c07-technical.html">
       <img class="af-card-icon" src="files/icons/ahead-code.svg" alt="">
       <h3>7. Technical documentation</h3>
       <span class="af-chip">Concept</span>
-      <p>Harmonisation methods, reading construction rules, country-specific
-      issues, crosswalks and the validation checks behind the scripts.</p>
     </a>
 
   </div>
